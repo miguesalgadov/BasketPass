@@ -1,0 +1,897 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Club {
+  id            String    @id @default(cuid())
+  name          String
+  slug          String    @unique
+  logo          String?
+  primaryColor  String?   @default("#F97316")
+  plan          String    @default("FREE")
+  planExpiresAt DateTime?
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  users               User[]
+  teams               Team[]
+  subscriptions       Subscription[]
+  payments            Payment[]
+  documents           Document[]
+  equipment           Equipment[]
+  feeTypes            FeeType[]
+  fees                Fee[]
+  notificationConfig  ClubNotificationConfig?
+  championships       Championship[]
+  account             ClubAccount?
+  cashTransactions    CashTransaction[]
+  cashCategories      CashCategory[]
+  monthlySnapshots    MonthlySnapshot[]
+}
+
+model User {
+  id           String    @id @default(cuid())
+  clubId       String
+  email        String
+  passwordHash String
+  role         String    @default("PLAYER")
+  firstName    String
+  lastName     String
+  avatarUrl    String?
+  phone        String?
+  rut          String?
+  isActive     Boolean   @default(true)
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  club                 Club           @relation(fields: [clubId], references: [id])
+  player               Player?
+  coachedTeams         Team[]         @relation("TeamCoach")
+  parentOf             PlayerParent[]
+  notifications        Notification[]
+  sentMessages         Message[]      @relation("MessageSender")
+  refreshTokens        RefreshToken[]
+  createdChampionships Championship[]
+  addedParticipants    ChampParticipant[] @relation("AddedParticipants")
+  champAuditLogs       ChampAuditLog[]    @relation("AuditLogUser")
+  statAssignments      StatMatchAssignment[] @relation("UserStatAssignments")
+  nominations          MatchNomination[]     @relation("CoachNominations")
+  createdTransactions  CashTransaction[]     @relation("TransactionCreator")
+  uploadedEvidences    TransactionEvidence[] @relation("EvidenceUploader")
+
+  @@unique([clubId, email])
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Player {
+  id            String    @id @default(cuid())
+  userId        String    @unique
+  teamId        String?
+  jerseyNumber  Int?
+  position      String?
+  birthDate     DateTime?
+  height        Float?
+  weight        Float?
+  clothingSize  String?
+  documentUrl   String?
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  user         User             @relation(fields: [userId], references: [id])
+  team         Team?            @relation(fields: [teamId], references: [id])
+  parents      PlayerParent[]
+  attendances  Attendance[]
+  stats        PlayerStat[]
+  injuries     Injury[]
+  payments     Payment[]
+  documents    Document[]
+  fees         Fee[]
+  champStats   ChampPlayerStat[]
+  matchLineups       MatchLineup[]           @relation("PlayerMatchLineups")
+  matchStats         MatchPlayerStat[]       @relation("PlayerMatchStats")
+  nominationPlayers  MatchNominationPlayer[]
+}
+
+model PlayerParent {
+  id       String @id @default(cuid())
+  playerId String
+  parentId String
+
+  player Player @relation(fields: [playerId], references: [id])
+  parent User   @relation(fields: [parentId], references: [id])
+
+  @@unique([playerId, parentId])
+}
+
+model Team {
+  id        String   @id @default(cuid())
+  clubId    String
+  name      String
+  category  String
+  coachId   String?
+  season    String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  club             Club               @relation(fields: [clubId], references: [id])
+  coach            User?              @relation("TeamCoach", fields: [coachId], references: [id])
+  players           Player[]
+  matches           Match[]
+  trainings         Training[]
+  champParticipants ChampParticipant[]
+  nominations       MatchNomination[]
+}
+
+model Match {
+  id          String   @id @default(cuid())
+  teamId      String
+  opponent    String
+  date        DateTime
+  location    String?
+  isHome      Boolean  @default(true)
+  scoreHome   Int?
+  scoreAway   Int?
+  status      String   @default("SCHEDULED")
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  team        Team             @relation(fields: [teamId], references: [id])
+  attendances Attendance[]
+  stats       PlayerStat[]
+  nominations MatchNomination[]
+}
+
+model Training {
+  id                String   @id @default(cuid())
+  teamId            String
+  date              DateTime
+  duration          Int
+  location          String?
+  plan              String?
+  coachNotes        String?
+  recurrenceGroupId String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  team        Team         @relation(fields: [teamId], references: [id])
+  attendances Attendance[]
+}
+
+model Attendance {
+  id         String   @id @default(cuid())
+  playerId   String
+  matchId    String?
+  trainingId String?
+  status     String   @default("PRESENT")
+  notes      String?
+  createdAt  DateTime @default(now())
+
+  player   Player    @relation(fields: [playerId], references: [id])
+  match    Match?    @relation(fields: [matchId], references: [id])
+  training Training? @relation(fields: [trainingId], references: [id])
+}
+
+model PlayerStat {
+  id        String   @id @default(cuid())
+  playerId  String
+  matchId   String
+  points              Int      @default(0)
+  rebounds            Int      @default(0)
+  assists             Int      @default(0)
+  steals              Int      @default(0)
+  blocks              Int      @default(0)
+  turnovers           Int      @default(0)
+  fouls               Int      @default(0)
+  minutes             Int      @default(0)
+  freeThrowsMade      Int      @default(0)
+  freeThrowsAttempted Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  player Player @relation(fields: [playerId], references: [id])
+  match  Match  @relation(fields: [matchId], references: [id])
+
+  @@unique([playerId, matchId])
+}
+
+model Payment {
+  id          String    @id @default(cuid())
+  clubId      String
+  playerId    String?
+  amount      Float
+  currency    String    @default("ARS")
+  concept     String
+  status      String    @default("PENDING")
+  mpPaymentId String?
+  mpOrderId   String?
+  dueDate     DateTime?
+  paidAt      DateTime?
+  receiptUrl  String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  club   Club    @relation(fields: [clubId], references: [id])
+  player Player? @relation(fields: [playerId], references: [id])
+}
+
+model Subscription {
+  id        String    @id @default(cuid())
+  clubId    String
+  plan      String    @default("FREE")
+  status    String    @default("ACTIVE")
+  mpSubId   String?
+  startDate DateTime
+  endDate   DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  club Club @relation(fields: [clubId], references: [id])
+}
+
+model Injury {
+  id          String    @id @default(cuid())
+  playerId    String
+  description String
+  injuredAt   DateTime
+  returnDate  DateTime?
+  severity    String?
+  notes       String?
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  player Player @relation(fields: [playerId], references: [id])
+}
+
+model Document {
+  id         String    @id @default(cuid())
+  clubId     String
+  playerId   String?
+  title      String
+  fileUrl    String
+  type       String
+  uploadedAt DateTime  @default(now())
+  expiresAt  DateTime?
+
+  club   Club    @relation(fields: [clubId], references: [id])
+  player Player? @relation(fields: [playerId], references: [id])
+}
+
+model Equipment {
+  id          String   @id @default(cuid())
+  clubId      String
+  name        String
+  description String?
+  quantity    Int      @default(0)
+  assignedTo  String?
+  condition   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  club Club @relation(fields: [clubId], references: [id])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  body      String
+  type      String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  senderId  String
+  teamId    String?
+  content   String
+  createdAt DateTime @default(now())
+
+  sender User @relation("MessageSender", fields: [senderId], references: [id])
+}
+
+// ── Payments v2 ───────────────────────────────────────────────────────────────
+
+// Tipo de cuota que define el club (ej: "Cuota mensual", "Inscripción")
+model FeeType {
+  id            String   @id @default(cuid())
+  clubId        String
+  name          String
+  amount        Float
+  currency      String   @default("CLP")
+  isRecurring   Boolean  @default(true)
+  dueDayOfMonth Int      @default(5)
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  club          Club     @relation(fields: [clubId], references: [id])
+  fees          Fee[]
+}
+
+// Cuota individual por jugador × mes
+// status: PENDING | PAID | OVERDUE | NOT_ENROLLED | INJURED | EXEMPT | CANCELLED
+// paymentMethod: CASH | TRANSFER | MERCADOPAGO | CHEQUE | OTHER
+model Fee {
+  id            String    @id @default(cuid())
+  clubId        String
+  playerId      String
+  feeTypeId     String
+  year          Int
+  month         Int
+  amount        Float
+  dueDate       DateTime
+  status        String    @default("PENDING")
+  paidAt        DateTime?
+  paidAmount    Float?
+  paymentMethod String?
+  mpPaymentId   String?
+  receiptUrl    String?
+  notes         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  club          Club        @relation(fields: [clubId], references: [id])
+  player        Player      @relation(fields: [playerId], references: [id])
+  feeType       FeeType     @relation(fields: [feeTypeId], references: [id])
+  reminders     FeeReminder[]
+
+  @@unique([playerId, feeTypeId, year, month])
+}
+
+// Log de recordatorios enviados
+// type: PRE_DUE_3DAYS | PRE_DUE_1DAY | DUE_TODAY | OVERDUE_1DAY | OVERDUE_7DAYS | OVERDUE_15DAYS | OVERDUE_30DAYS | MANUAL
+// channel: EMAIL | PUSH | WHATSAPP | SMS
+model FeeReminder {
+  id       String   @id @default(cuid())
+  feeId    String
+  type     String
+  channel  String
+  sentAt   DateTime @default(now())
+  success  Boolean  @default(true)
+  errorMsg String?
+
+  fee      Fee      @relation(fields: [feeId], references: [id])
+}
+
+// Configuración de notificaciones automáticas del club
+model ClubNotificationConfig {
+  id                   String  @id @default(cuid())
+  clubId               String  @unique
+  sendPreDue3Days      Boolean @default(true)
+  sendPreDue1Day       Boolean @default(false)
+  sendDueToday         Boolean @default(true)
+  sendOverdue1Day      Boolean @default(true)
+  sendOverdue7         Boolean @default(true)
+  sendOverdue15        Boolean @default(false)
+  sendOverdue30        Boolean @default(true)
+  emailEnabled         Boolean @default(true)
+  pushEnabled          Boolean @default(true)
+  whatsappEnabled      Boolean @default(false)
+  emailSubjectTemplate String  @default("💳 Cuota {{month}} {{year}} — {{clubName}}")
+
+  club                 Club    @relation(fields: [clubId], references: [id])
+}
+
+// ── Campeonatos ───────────────────────────────────────────────────────────────
+
+model Championship {
+  id                 String    @id @default(cuid())
+  clubId             String?
+  name               String
+  category           String
+  season             String
+  organizer          String?
+  format             String    @default("DOUBLE_ROUND_ROBIN")
+  scoringSystem      String    @default("FIBA")
+  hasPlayoffs        Boolean   @default(true)
+  playoffTeams       Int       @default(4)
+  playoffFormat      String    @default("SINGLE_ELIMINATION")
+  playoffSeries      Int       @default(1)
+  hasThirdPlace      Boolean   @default(true)
+  playoffSeeding     String    @default("FIBA_STANDARD")
+  status             String    @default("DRAFT")
+
+  // Teams
+  minTeams           Int       @default(8)
+  maxTeams           Int       @default(8)
+  numGroups          Int       @default(2)
+  teamsQualifyPerGroup Int     @default(2)
+
+  // Dates
+  startDate          DateTime?
+  endDate            DateTime?
+  daysBetweenRounds  Int       @default(7)
+  defaultVenue       String?
+
+  // Rules
+  walkoverScore      Int       @default(20)
+  walkoverWaitMins   Int       @default(15)
+  maxForeignPlayers  Int?
+
+  // Metadata
+  createdById        String
+  fixtureGeneratedAt DateTime?
+  deletedAt          DateTime?
+  deleteReason       String?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  club           Club?             @relation(fields: [clubId], references: [id])
+  createdBy      User              @relation(fields: [createdById], references: [id])
+  participants   ChampParticipant[]
+  rounds         Round[]
+  matches        ChampMatch[]
+  standings      Standing[]
+  playoffBracket PlayoffBracket?
+  auditLog       ChampAuditLog[]
+}
+
+model ChampParticipant {
+  id                 String    @id @default(cuid())
+  championshipId     String
+  teamId             String?
+  externalName       String?
+  externalShort      String?
+  externalCity       String?
+  externalContact    String?
+  externalNotes      String?
+  isExternal         Boolean   @default(false)
+  isConfirmed        Boolean   @default(true)
+  seed               Int?
+  groupNumber        Int?
+  withdrawnAt        DateTime?
+  withdrawReason     String?
+  addedAt            DateTime  @default(now())
+  addedById          String?
+
+  championship  Championship  @relation(fields: [championshipId], references: [id], onDelete: Cascade)
+  team          Team?         @relation(fields: [teamId], references: [id])
+  addedBy       User?         @relation("AddedParticipants", fields: [addedById], references: [id])
+  homeMatches   ChampMatch[]  @relation("ChampHomeTeam")
+  awayMatches   ChampMatch[]  @relation("ChampAwayTeam")
+  standing      Standing?
+
+  @@unique([championshipId, teamId])
+}
+
+model ChampAuditLog {
+  id             String       @id @default(cuid())
+  championshipId String
+  userId         String
+  action         String
+  detail         String?
+  createdAt      DateTime     @default(now())
+
+  championship   Championship @relation(fields: [championshipId], references: [id], onDelete: Cascade)
+  user           User         @relation("AuditLogUser", fields: [userId], references: [id])
+}
+
+model Round {
+  id             String    @id @default(cuid())
+  championshipId String
+  number         Int
+  name           String
+  phase          String    @default("REGULAR")
+  scheduledDate  DateTime?
+  status         String    @default("PENDING")
+
+  championship   Championship @relation(fields: [championshipId], references: [id], onDelete: Cascade)
+  matches        ChampMatch[]
+}
+
+model ChampMatch {
+  id             String    @id @default(cuid())
+  championshipId String
+  roundId        String
+  homeTeamId     String
+  awayTeamId     String
+  scheduledAt    DateTime?
+  venue          String?
+  status         String    @default("SCHEDULED")
+  homeScore      Int?
+  awayScore      Int?
+  isWalkover     Boolean   @default(false)
+  walkoverTeamId String?
+  homeQ1         Int?
+  homeQ2         Int?
+  homeQ3         Int?
+  homeQ4         Int?
+  homeOT         Int?
+  awayQ1         Int?
+  awayQ2         Int?
+  awayQ3         Int?
+  awayQ4         Int?
+  awayOT         Int?
+  isPlayoff      Boolean   @default(false)
+  playoffRound   Int?
+  seriesGame     Int?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  championship    Championship     @relation(fields: [championshipId], references: [id], onDelete: Cascade)
+  round           Round            @relation(fields: [roundId], references: [id])
+  homeTeam        ChampParticipant @relation("ChampHomeTeam", fields: [homeTeamId], references: [id])
+  awayTeam        ChampParticipant @relation("ChampAwayTeam", fields: [awayTeamId], references: [id])
+  playerStats     ChampPlayerStat[]
+  statSession     MatchStatSession?
+  statAssignments StatMatchAssignment[]
+}
+
+model ChampPlayerStat {
+  id                String  @id @default(cuid())
+  matchId           String
+  playerId          String
+  teamParticipantId String
+  minutes           Int     @default(0)
+  points            Int     @default(0)
+  fg2Made           Int     @default(0)
+  fg2Attempted      Int     @default(0)
+  fg3Made           Int     @default(0)
+  fg3Attempted      Int     @default(0)
+  ftMade            Int     @default(0)
+  ftAttempted       Int     @default(0)
+  offRebounds       Int     @default(0)
+  defRebounds       Int     @default(0)
+  assists           Int     @default(0)
+  steals            Int     @default(0)
+  blocks            Int     @default(0)
+  turnovers         Int     @default(0)
+  foulsPersonal     Int     @default(0)
+  foulsTechnical    Int     @default(0)
+  plusMinus         Int     @default(0)
+  didNotPlay        Boolean @default(false)
+  dnpReason         String?
+
+  match   ChampMatch @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  player  Player     @relation(fields: [playerId], references: [id])
+
+  @@unique([matchId, playerId])
+}
+
+model Standing {
+  id             String   @id @default(cuid())
+  championshipId String
+  participantId  String   @unique
+  position       Int
+  played         Int      @default(0)
+  won            Int      @default(0)
+  lost           Int      @default(0)
+  walkoversWon   Int      @default(0)
+  walkoversLost  Int      @default(0)
+  pointsFor      Int      @default(0)
+  pointsAgainst  Int      @default(0)
+  tablePoints    Int      @default(0)
+  pointsDiff     Int      @default(0)
+  h2hRecord      String?
+  updatedAt      DateTime @updatedAt
+
+  championship  Championship     @relation(fields: [championshipId], references: [id], onDelete: Cascade)
+  participant   ChampParticipant @relation(fields: [participantId], references: [id])
+}
+
+model PlayoffBracket {
+  id             String  @id @default(cuid())
+  championshipId String  @unique
+  structure      String
+  currentRound   Int     @default(1)
+  winnerId       String?
+  runnerUpId     String?
+  thirdPlaceId   String?
+
+  championship   Championship @relation(fields: [championshipId], references: [id], onDelete: Cascade)
+}
+
+// ── Statistics Module ─────────────────────────────────────────────────────────
+
+model StatMatchAssignment {
+  id             String   @id @default(cuid())
+  userId         String
+  matchId        String
+  championshipId String?
+  assignedById   String
+  assignedAt     DateTime @default(now())
+  isActive       Boolean  @default(true)
+
+  user  User       @relation("UserStatAssignments", fields: [userId], references: [id])
+  match ChampMatch @relation(fields: [matchId], references: [id])
+}
+
+model MatchStatSession {
+  id                String    @id @default(cuid())
+  matchId           String?   @unique
+  championshipId    String?
+  homeTeamName      String?
+  awayTeamName      String?
+  homeBasketTeamId  String?
+  awayBasketTeamId  String?
+  status            String    @default("NOT_STARTED")
+  period            Int       @default(1)
+  clockSeconds      Int       @default(600)
+  homeTimeouts      Int       @default(5)
+  awayTimeouts      Int       @default(5)
+  homeScore         Int       @default(0)
+  awayScore         Int       @default(0)
+  homePeriodScores  String    @default("[]")
+  awayPeriodScores  String    @default("[]")
+  startedAt         DateTime?
+  finishedAt        DateTime?
+  createdById       String
+  analysisGenerated Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  match        ChampMatch?       @relation(fields: [matchId], references: [id])
+  lineups      MatchLineup[]
+  plays        PlayByPlay[]
+  playerStats  MatchPlayerStat[]
+  shotAttempts ShotAttempt[]
+  analysis     MatchAnalysis?
+}
+
+model MatchLineup {
+  id                   String    @id @default(cuid())
+  sessionId            String
+  participantId        String
+  playerId             String?
+  externalPlayerName   String?
+  externalPlayerNumber Int?
+  isStarter            Boolean   @default(false)
+  jerseyNumber         Int?
+  position             String?
+  isOnCourt            Boolean   @default(false)
+  minutesPlayed        Float     @default(0)
+  lastSubstitutionAt   DateTime?
+
+  session MatchStatSession  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  player  Player?            @relation("PlayerMatchLineups", fields: [playerId], references: [id])
+  stats   MatchPlayerStat?
+}
+
+model MatchPlayerStat {
+  id                   String  @id @default(cuid())
+  sessionId            String
+  lineupId             String  @unique
+  playerId             String?
+  participantId        String
+  minutesPlayed        Float   @default(0)
+  fg2Made              Int     @default(0)
+  fg2Attempted         Int     @default(0)
+  fg3Made              Int     @default(0)
+  fg3Attempted         Int     @default(0)
+  ftMade               Int     @default(0)
+  ftAttempted          Int     @default(0)
+  points               Int     @default(0)
+  offRebounds          Int     @default(0)
+  defRebounds          Int     @default(0)
+  assists              Int     @default(0)
+  steals               Int     @default(0)
+  blocks               Int     @default(0)
+  drawFouls            Int     @default(0)
+  turnovers            Int     @default(0)
+  personalFouls        Int     @default(0)
+  technicalFouls       Int     @default(0)
+  unsportsmanlikeFouls Int     @default(0)
+  plusMinus            Int     @default(0)
+  pir                  Int     @default(0)
+  didNotPlay           Boolean @default(false)
+  dnpReason            String?
+
+  session MatchStatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  lineup  MatchLineup       @relation(fields: [lineupId], references: [id], onDelete: Cascade)
+  player  Player?            @relation("PlayerMatchStats", fields: [playerId], references: [id])
+}
+
+model PlayByPlay {
+  id           String    @id @default(cuid())
+  sessionId    String
+  sequence     Int
+  period       Int
+  clockSeconds Int
+  team         String
+  playerId     String?
+  lineupId     String?
+  actionType   String
+  points       Int       @default(0)
+  homeScore    Int
+  awayScore    Int
+  isReverted   Boolean   @default(false)
+  revertedAt   DateTime?
+  revertedById String?
+  createdAt    DateTime  @default(now())
+
+  session MatchStatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+}
+
+model ShotAttempt {
+  id           String  @id @default(cuid())
+  sessionId    String
+  playById     String?
+  playerId     String?
+  team         String
+  courtX       Float
+  courtY       Float
+  shotType     String
+  isMade       Boolean
+  isAssisted   Boolean @default(false)
+  assistedById String?
+  period       Int
+  clockSeconds Int
+
+  session MatchStatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+}
+
+model MatchAnalysis {
+  id              String   @id @default(cuid())
+  sessionId       String   @unique
+  generatedAt     DateTime @default(now())
+  generatedById   String
+  recapText       String
+  keyMoments      String
+  homeEffRating   Float    @default(0)
+  awayEffRating   Float    @default(0)
+  homePace        Float    @default(0)
+  awayPace        Float    @default(0)
+  homeNetRating   Float    @default(0)
+  awayNetRating   Float    @default(0)
+  topPerformer    String
+  teamOfMatch     String
+  mvpPlayerId     String?
+  homeVsSeasonAvg String   @default("{}")
+  awayVsSeasonAvg String   @default("{}")
+  strengths       String   @default("{}")
+
+  session MatchStatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+}
+
+model MatchNomination {
+  id             String    @id @default(cuid())
+  matchId        String
+  teamId         String
+  coachId        String
+  notes          String?
+  jerseyColor    String?
+  sockColor      String?
+  whatsappSentAt DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  match   Match                   @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  team    Team                    @relation(fields: [teamId], references: [id])
+  coach   User                    @relation("CoachNominations", fields: [coachId], references: [id])
+  players MatchNominationPlayer[]
+
+  @@unique([matchId, teamId])
+}
+
+model MatchNominationPlayer {
+  id           String @id @default(cuid())
+  nominationId String
+  playerId     String
+
+  nomination MatchNomination @relation(fields: [nominationId], references: [id], onDelete: Cascade)
+  player     Player          @relation(fields: [playerId], references: [id])
+
+  @@unique([nominationId, playerId])
+}
+
+// ── Finanzas / Flujo de Caja ──────────────────────────────────────────────────
+
+model ClubAccount {
+  id             String   @id @default(cuid())
+  clubId         String   @unique
+  name           String   @default("Cuenta principal")
+  bankName       String?
+  accountNumber  String?
+  currentBalance Float    @default(0)
+  currency       String   @default("CLP")
+  lastUpdatedAt  DateTime @default(now())
+  createdAt      DateTime @default(now())
+
+  club         Club              @relation(fields: [clubId], references: [id])
+  transactions CashTransaction[]
+}
+
+model CashTransaction {
+  id              String    @id @default(cuid())
+  accountId       String
+  clubId          String
+  type            String    // INCOME | EXPENSE | ADJUSTMENT
+  amount          Float
+  currency        String    @default("CLP")
+  date            DateTime
+  concept         String
+  description     String?
+  category        String
+  source          String    @default("MANUAL") // MANUAL | AUTO_FEE | AUTO_MP
+  feeId           String?
+  mpPaymentId     String?
+  paymentMethod   String?
+  referenceNumber String?
+  balanceAfter    Float
+  createdById     String
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  isVoided        Boolean   @default(false)
+  voidReason      String?
+  voidedAt        DateTime?
+  voidedById      String?
+
+  account   ClubAccount          @relation(fields: [accountId], references: [id])
+  club      Club                 @relation(fields: [clubId], references: [id])
+  createdBy User                 @relation("TransactionCreator", fields: [createdById], references: [id])
+  evidences TransactionEvidence[]
+}
+
+model TransactionEvidence {
+  id            String   @id @default(cuid())
+  transactionId String
+  clubId        String
+  fileName      String
+  fileSize      Int
+  mimeType      String
+  storageKey    String
+  publicUrl     String
+  thumbnailUrl  String?
+  uploadedById  String
+  uploadedAt    DateTime @default(now())
+  description   String?
+
+  transaction CashTransaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  uploadedBy  User            @relation("EvidenceUploader", fields: [uploadedById], references: [id])
+}
+
+model CashCategory {
+  id        String  @id @default(cuid())
+  clubId    String
+  name      String
+  type      String
+  color     String  @default("#7A8098")
+  icon      String  @default("💰")
+  isDefault Boolean @default(false)
+  isActive  Boolean @default(true)
+
+  club Club @relation(fields: [clubId], references: [id])
+}
+
+model MonthlySnapshot {
+  id               String   @id @default(cuid())
+  clubId           String
+  year             Int
+  month            Int
+  openingBalance   Float
+  closingBalance   Float
+  totalIncome      Float
+  totalExpense     Float
+  netFlow          Float
+  transactionCount Int
+  evidenceCount    Int
+  generatedAt      DateTime @default(now())
+
+  club Club @relation(fields: [clubId], references: [id])
+
+  @@unique([clubId, year, month])
+}
+

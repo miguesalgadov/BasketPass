@@ -43,7 +43,8 @@ const SHOT_ACTIONS = new Set([
 
 function getBaseUrl(): string {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api/v1';
-  return apiUrl.replace('/api/v1', '');
+  const base = apiUrl.replace('/api/v1', '');
+  return base.startsWith('http') ? base : '';
 }
 
 // ── Flash message component ───────────────────────────────────────────────────
@@ -254,6 +255,7 @@ export default function LiveStatsPage() {
 
   useEffect(() => {
     const baseUrl = getBaseUrl();
+    if (!baseUrl) return; // Socket.io not available in serverless deployment
     const token   = useAuthStore.getState().accessToken ?? localStorage.getItem('accessToken');
 
     const socket = io(`${baseUrl}/stats`, {

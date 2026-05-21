@@ -71,8 +71,9 @@ export default function CoachChatPage() {
 
   useEffect(() => { loadMessages(); }, [loadMessages]);
 
-  // Socket.io setup
+  // Socket.io setup (only when a dedicated API server is available)
   useEffect(() => {
+    if (!API_URL) return;
     const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
     const socket = io(API_URL, { auth: { token }, transports: ['websocket'] });
     socketRef.current = socket;
