@@ -1,0 +1,153 @@
+'use client';
+
+import { useEffect, useRef, useState } from 'react';
+import { api } from '@/lib/api';
+import toast from 'react-hot-toast';
+import { PlayerCredential } from '@/components/modules/player/PlayerCredential';
+import { PaymentStatusBadge, PaymentStatusLevel } from '@/components/modules/player/PaymentStatusBadge';
+import { UpcomingActivities, ActivityEvent } from '@/components/modules/player/UpcomingActivities';
+import { SeasonSummaryBar } from '@/components/modules/player/SeasonSummaryBar';
+import { PerformanceSparklines } from '@/components/modules/player/PerformanceSparklines';
+import { MiniCalendar } from '@/components/modules/player/MiniCalendar';
+
+interface DashboardData {
+  player: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    photoUrl?: string | null;
+    jerseyNumber?: number | null;
+    position?: string | null;
+    height?: number | null;
+    weight?: number | null;
+    team?: { id: string; name: string; category: string } | null;
+    club?: { name: string; primaryColor?: string | null; slug?: string | null } | null;
+    seasonAvgPoints: number;
+    seasonAvgRebounds: number;
+    seasonAvgAssists: number;
+    attendanceRate: number;
+  };
+  paymentStatus: PaymentStatusLevel;
+  fees: { id: string; month: number; year: number; status: string; amount: number; paidAmount?: number | null; paidAt?: string | null; dueDate: string }[];
+  upcomingEvents: ActivityEvent[];
+  season: { matchesPlayed: number; wins: number; losses: number; attendanceRate: number; callups: number };
+  recentStats: { matchId: string; matchDate: string; opponent: string; points: number; rebounds: number; assists: number; minutes: number }[];
+}
+
+function SkeletonCard({ h = 'h-40' }: { h?: string }) {
+  return <div className={`${h} rounded-xl bg-white/5 animate-pulse`} />;
+}
+
+export default function PlayerDashboardPage() {
+  const [data, setData] = useState<DashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    api.get('/players/me/dashboard')
+      .then((r) => setData(r.data.data))
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  const handleAvatarFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const formData = new FormData();
+    formData.append('avatar', file);
+    try {
+      const res = await api.post('/players/me/avatar', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      setData((prev) => prev ? { ...prev, player: { ...prev.player, photoUrl: res.data.data.avatarUrl } } : prev);
+      toast.success('Foto actualizada');
+    } catch {
+      toast.error('Error al subir la foto');
+    }
+    e.target.value = '';
+  };
+
+  const accent = data?.player.club?.primaryColor ?? '#F97316';
+
+  return (
+    <div className="min-h-screen bg-[#0F1117] -m-4 lg:-m-6 p-4 lg:p-6 pb-24 lg:pb-6">
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleAvatarFileChange}
+      />
+
+      {/* ── MOBILE LAYOUT ── */}
+      <div className="flex flex-col lg:hidden gap-3">
+        {/* Greeting */}
+        <div className="pt-1">
+          <p className="text-xs text-white/40 uppercase tracking-widest mb-0.5">Bienvenido</p>
+          <h1 className="text-xl font-black text-white">
+            {loading ? '...' : `${data?.player.firstName} ${data?.player.lastName}`}
+          </h1>
+        </div>
+
+        {loading ? (
+          <>
+            <SkeletonCard h="h-52" />
+            <SkeletonCard h="h-14" />
+            <SkeletonCard h="h-40" />
+            <SkeletonCard h="h-28" />
+          </>
+        ) : data ? (
+          <>
+            <PlayerCredential player={data.player} onAvatarChange={() => fileInputRef.current?.click()} paymentStatus={data.paymentStatus} season={data.season} />
+            <PaymentStatusBadge status={data.paymentStatus} fees={data.fees} />
+            <UpcomingActivities events={data.upcomingEvents} />
+            <SeasonSummaryBar stats={data.season} />
+          </>
+        ) : (
+          <div className="text-white/40 text-sm text-center py-12">Error al cargar el perfil</div>
+        )}
+      </div>
+
+      {/* ── DESKTOP LAYOUT ── */}
+      <div className="hidden lg:block">
+        <div className="mb-4">
+          <p className="text-xs text-white/40 uppercase tracking-widest mb-0.5">Bienvenido</p>
+          <h1 className="text-2xl font-black text-white">
+            {loading ? '...' : `${data?.player.firstName} ${data?.player.lastName}`}
+          </h1>
+        </div>
+
+        {loading ? (
+          <div className="grid grid-cols-[320px_1fr] gap-4">
+            <div className="space-y-3">
+              <SkeletonCard h="h-72" />
+              <SkeletonCard h="h-16" />
+            </div>
+            <div className="space-y-3">
+              <SkeletonCard h="h-24" />
+              <SkeletonCard h="h-28" />
+              <SkeletonCard h="h-48" />
+              <SkeletonCard h="h-56" />
+            </div>
+          </div>
+        ) : data ? (
+          <div className="grid grid-cols-[320px_1fr] gap-4">
+            <div className="space-y-3">
+              <PlayerCredential player={data.player} onAvatarChange={() => fileInputRef.current?.click()} paymentStatus={data.paymentStatus} season={data.season} />
+              <PaymentStatusBadge status={data.paymentStatus} fees={data.fees} />
+            </div>
+            <div className="space-y-3">
+              <SeasonSummaryBar stats={data.season} />
+              <PerformanceSparklines stats={data.recentStats} />
+              <UpcomingActivities events={data.upcomingEvents} />
+              <MiniCalendar events={data.upcomingEvents} />
+            </div>
+          </div>
+        ) : (
+          <div className="text-white/40 text-sm text-center py-12">Error al cargar el perfil</div>
+        )}
+      </div>
+
+    </div>
+  );
+}
