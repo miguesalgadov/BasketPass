@@ -83,7 +83,7 @@ export function PlayerCredential({ player, onAvatarChange, paymentStatus = 'OK',
   const idCode = `BP-${year}-${player.id.slice(0, 6).toUpperCase()}`;
   const pm     = PAYMENT_LABEL[paymentStatus] ?? PAYMENT_LABEL.OK;
 
-  const apiBase = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
+  const apiBase = process.env.NEXT_PUBLIC_API_URL ?? '';
   const avatarSrc = player.photoUrl
     ? (player.photoUrl.startsWith('http') ? player.photoUrl : `${apiBase}${player.photoUrl}`)
     : null;

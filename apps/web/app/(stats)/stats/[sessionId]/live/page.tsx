@@ -42,7 +42,7 @@ const SHOT_ACTIONS = new Set([
 ]);
 
 function getBaseUrl(): string {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api/v1';
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? '/api/v1';
   const base = apiUrl.replace('/api/v1', '');
   return base.startsWith('http') ? base : '';
 }

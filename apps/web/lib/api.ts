@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 export const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1',
+  baseURL: process.env.NEXT_PUBLIC_API_URL || '/api/v1',
   withCredentials: true,
   headers: { 'Content-Type': 'application/json' },
 });
@@ -23,7 +23,7 @@ api.interceptors.response.use(
       original._retry = true;
       try {
         const res = await axios.post(
-          `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1'}/auth/refresh`,
+          `${process.env.NEXT_PUBLIC_API_URL || '/api/v1'}/auth/refresh`,
           {},
           { withCredentials: true }
         );

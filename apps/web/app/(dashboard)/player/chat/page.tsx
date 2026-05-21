@@ -15,7 +15,7 @@ interface Message {
   sender: { id: string; firstName: string; lastName: string };
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') ?? 'http://localhost:3001';
+const API_URL = process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') ?? '';
 
 function initials(first: string, last: string) {
   return `${first[0] ?? ''}${last[0] ?? ''}`.toUpperCase();
