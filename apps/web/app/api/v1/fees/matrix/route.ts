@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
   const feeTypeIdParam = searchParams.get('feeTypeId') || undefined;
 
   const feeTypes = await prisma.feeType.findMany({
-    where: { clubId: auth.clubId },
+    where: { clubId: auth.clubId, isActive: true },
     orderBy: { name: 'asc' },
     select: { id: true, name: true, amount: true, currency: true },
   });

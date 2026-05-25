@@ -11,8 +11,8 @@ export async function POST(req: NextRequest) {
     const { year, month, feeTypeId } = await req.json();
 
     const feeTypes = feeTypeId
-      ? await prisma.feeType.findMany({ where: { id: feeTypeId, clubId: auth.clubId } })
-      : await prisma.feeType.findMany({ where: { clubId: auth.clubId } });
+      ? await prisma.feeType.findMany({ where: { id: feeTypeId, clubId: auth.clubId, isActive: true } })
+      : await prisma.feeType.findMany({ where: { clubId: auth.clubId, isActive: true } });
 
     if (feeTypes.length === 0) return err('No hay tipos de cuota configurados', 'NOT_FOUND', 404);
 
