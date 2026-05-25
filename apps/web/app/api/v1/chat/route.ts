@@ -8,7 +8,7 @@ export async function GET(req: NextRequest) {
 
   const teamId = new URL(req.url).searchParams.get('teamId');
   const messages = await prisma.message.findMany({
-    where: { ...(teamId && { teamId }) },
+    where: { sender: { clubId: auth.clubId }, ...(teamId && { teamId }) },
     include: { sender: { select: { id: true, firstName: true, lastName: true, avatarUrl: true, role: true } } },
     orderBy: { createdAt: 'asc' },
     take: 100,
@@ -22,6 +22,10 @@ export async function POST(req: NextRequest) {
 
   try {
     const { teamId, content } = await req.json();
+    if (teamId) {
+      const team = await prisma.team.findFirst({ where: { id: teamId, clubId: auth.clubId } });
+      if (!team) return err('Team not found', 'NOT_FOUND', 404);
+    }
     const message = await prisma.message.create({
       data: { senderId: auth.id, teamId: teamId || null, content },
       include: { sender: { select: { id: true, firstName: true, lastName: true, avatarUrl: true } } },

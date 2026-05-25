@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getAuthUser, unauthorized, ok, err } from '@/lib/auth-server';
+import { getAuthUser, unauthorized, forbidden, ok, err } from '@/lib/auth-server';
 
 export async function GET(req: NextRequest) {
   const auth = getAuthUser(req);
@@ -21,6 +21,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   const auth = getAuthUser(req);
   if (!auth) return unauthorized();
+  if (auth.role !== 'CLUB_ADMIN' && auth.role !== 'SUPER_ADMIN') return forbidden();
 
   const { name, category, season, coachId } = await req.json();
   const team = await prisma.team.create({

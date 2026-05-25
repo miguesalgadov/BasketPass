@@ -6,6 +6,9 @@ export async function GET(req: NextRequest, { params }: { params: { matchId: str
   const auth = getAuthUser(req);
   if (!auth) return unauthorized();
 
+  const match = await prisma.match.findFirst({ where: { id: params.matchId, team: { clubId: auth.clubId } } });
+  if (!match) return err('Match not found', 'NOT_FOUND', 404);
+
   const teamId = new URL(req.url).searchParams.get('teamId');
   const nomination = await prisma.matchNomination.findFirst({
     where: { matchId: params.matchId, ...(teamId && { teamId }) },
@@ -17,6 +20,9 @@ export async function GET(req: NextRequest, { params }: { params: { matchId: str
 export async function PUT(req: NextRequest, { params }: { params: { matchId: string } }) {
   const auth = getAuthUser(req);
   if (!auth) return unauthorized();
+
+  const match = await prisma.match.findFirst({ where: { id: params.matchId, team: { clubId: auth.clubId } } });
+  if (!match) return err('Match not found', 'NOT_FOUND', 404);
 
   try {
     const { teamId, playerIds, notes, jerseyColor, sockColor } = await req.json();

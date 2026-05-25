@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getAuthUser, unauthorized, ok, err } from '@/lib/auth-server';
+import { getAuthUser, unauthorized, forbidden, ok, err } from '@/lib/auth-server';
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   const auth = getAuthUser(req);
@@ -20,6 +20,10 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   const auth = getAuthUser(req);
   if (!auth) return unauthorized();
+  if (auth.role !== 'CLUB_ADMIN' && auth.role !== 'SUPER_ADMIN' && auth.role !== 'COACH') return forbidden();
+
+  const existing = await prisma.team.findFirst({ where: { id: params.id, clubId: auth.clubId } });
+  if (!existing) return err('Team not found', 'NOT_FOUND', 404);
 
   const body = await req.json();
   const team = await prisma.team.update({
@@ -33,6 +37,10 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   const auth = getAuthUser(req);
   if (!auth) return unauthorized();
+  if (auth.role !== 'CLUB_ADMIN' && auth.role !== 'SUPER_ADMIN') return forbidden();
+
+  const existing = await prisma.team.findFirst({ where: { id: params.id, clubId: auth.clubId } });
+  if (!existing) return err('Team not found', 'NOT_FOUND', 404);
 
   await prisma.team.update({ where: { id: params.id }, data: { isActive: false } });
   return ok({ message: 'Team deactivated' });

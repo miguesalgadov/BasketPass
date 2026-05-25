@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getAuthUser, unauthorized, ok } from '@/lib/auth-server';
+import { getAuthUser, unauthorized, forbidden, ok } from '@/lib/auth-server';
 
 const CATEGORY_LABELS: Record<string, string> = {
   MONTHLY_FEE: 'Cuota mensual', REGISTRATION: 'Inscripción',
@@ -16,6 +16,7 @@ const CATEGORY_LABELS: Record<string, string> = {
 export async function GET(req: NextRequest) {
   const auth = getAuthUser(req);
   if (!auth) return unauthorized();
+  if (auth.role !== 'CLUB_ADMIN' && auth.role !== 'SUPER_ADMIN') return forbidden();
 
   const { searchParams } = new URL(req.url);
   const year  = parseInt(searchParams.get('year')  || String(new Date().getFullYear()));

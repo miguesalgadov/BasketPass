@@ -1,13 +1,13 @@
 import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getAuthUser, unauthorized, ok } from '@/lib/auth-server';
+import { getAuthUser, unauthorized, ok, err } from '@/lib/auth-server';
 
 export async function GET(req: NextRequest, { params }: { params: { matchId: string } }) {
   const auth = getAuthUser(req);
   if (!auth) return unauthorized();
 
   const stats = await prisma.playerStat.findMany({
-    where: { matchId: params.matchId },
+    where: { matchId: params.matchId, match: { team: { clubId: auth.clubId } } },
     include: { player: { include: { user: { select: { firstName: true, lastName: true } } } } },
   });
   return ok(stats);
@@ -16,6 +16,9 @@ export async function GET(req: NextRequest, { params }: { params: { matchId: str
 export async function POST(req: NextRequest, { params }: { params: { matchId: string } }) {
   const auth = getAuthUser(req);
   if (!auth) return unauthorized();
+
+  const match = await prisma.match.findFirst({ where: { id: params.matchId, team: { clubId: auth.clubId } } });
+  if (!match) return err('Match not found', 'NOT_FOUND', 404);
 
   const stats = await req.json();
   const results = await prisma.$transaction(

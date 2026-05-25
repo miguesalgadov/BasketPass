@@ -8,6 +8,10 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
+    if (body.matchId) {
+      const match = await prisma.match.findFirst({ where: { id: body.matchId, team: { clubId: auth.clubId } } });
+      if (!match) return err('Match not found', 'NOT_FOUND', 404);
+    }
     const session = await prisma.matchStatSession.create({
       data: { ...body, createdById: auth.id },
     });
