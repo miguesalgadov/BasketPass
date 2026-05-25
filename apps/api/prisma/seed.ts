@@ -471,8 +471,8 @@ async function main() {
     panterasPlayers.push(pl);
   }
 
-  // ── FeeType + Fees para CD Panteras ───────────────────────────────────────
-  const feeTypePanteras = await prisma.feeType.upsert({
+  // ── FeeType para CD Panteras (solo la estructura, sin generar cuotas) ──────
+  await prisma.feeType.upsert({
     where: { id: 'feetype-panteras-mensual' },
     update: {},
     create: {
@@ -486,32 +486,6 @@ async function main() {
     },
   });
 
-  for (let idx = 0; idx < panterasPlayers.length; idx++) {
-    const player = panterasPlayers[idx];
-    for (let month = 1; month <= 5; month++) {
-      const dueDate = new Date(currentYear, month - 1, feeTypePanteras.dueDayOfMonth);
-      const status  = feeStatusByMonth(idx, month);
-      const paidAt  = status === 'PAID' ? new Date(currentYear, month - 1, Math.floor(Math.random() * 10) + 1) : null;
-      try {
-        await prisma.fee.upsert({
-          where: { playerId_feeTypeId_year_month: { playerId: player.id, feeTypeId: feeTypePanteras.id, year: currentYear, month } },
-          update: {},
-          create: {
-            clubId:    clubPanteras.id,
-            playerId:  player.id,
-            feeTypeId: feeTypePanteras.id,
-            year:      currentYear,
-            month,
-            amount:    feeTypePanteras.amount,
-            dueDate,
-            status,
-            ...(paidAt && { paidAt, paidAmount: feeTypePanteras.amount, paymentMethod: ['CASH','TRANSFER','MERCADOPAGO'][month % 3] }),
-          },
-        });
-      } catch { /* skip duplicates */ }
-    }
-  }
-
   // ── Summary ───────────────────────────────────────────────────────────────
   console.log('\n✅ Seed completado\n');
   console.log('── Club Demo Basket ────────────────────────────────');
@@ -523,7 +497,7 @@ async function main() {
   console.log('── CD Panteras ─────────────────────────────────────');
   console.log('  admin@panteras.com      → CLUB_ADMIN');
   console.log('  ivan.rojas@panteras.com → COACH  (Panteras)');
-  console.log('  [16 jugadores]          → PLAYER (ver lista completa)');
+  console.log('  [16 jugadores]          → PLAYER (sin datos inventados)');
   console.log('');
   console.log('  Contraseña (todos):  Admin1234!');
   console.log('');
@@ -534,11 +508,11 @@ async function main() {
   console.log('  Panteras     Mayores  — 16 jugadores (CD Panteras)');
   console.log('');
   console.log('── Datos generados ────────────────────────────────');
-  console.log('  9 partidos (5 completados, 4 próximos)');
-  console.log('  7 entrenamientos (4 pasados, 3 próximos)');
+  console.log('  9 partidos (5 completados, 4 próximos) — solo Club Demo');
+  console.log('  7 entrenamientos (4 pasados, 3 próximos) — solo Club Demo');
   console.log('  Asistencias, estadísticas y pagos incluidos');
   console.log('  8 documentos de ejemplo');
-  console.log('  FeeTypes + cuotas Ene–May 2026 para ambos clubs');
+  console.log('  FeeTypes + cuotas Ene–May 2026 — solo Club Demo');
 }
 
 main()
