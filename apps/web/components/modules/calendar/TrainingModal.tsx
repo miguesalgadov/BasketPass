@@ -134,7 +134,10 @@ export function TrainingModal({ open, onClose, onSuccess, training }: Props) {
     if (recurrent && !isEdit) {
       payload.recurrent         = true;
       payload.daysOfWeek        = daysOfWeek;
-      payload.recurrenceEndDate = new Date(`${endDate}T23:59:59`).toISOString();
+      payload.localDate         = data.date;
+      payload.localTime         = data.time;
+      payload.tzOffset          = new Date().getTimezoneOffset();
+      payload.recurrenceEndDate = endDate;
     }
 
     try {

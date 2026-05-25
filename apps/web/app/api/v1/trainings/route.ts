@@ -27,24 +27,42 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
 
     if (body.recurrent && body.daysOfWeek?.length && body.recurrenceEndDate) {
-      const startDate = new Date(body.date);
-      const endDate   = new Date(body.recurrenceEndDate);
-      const hours     = startDate.getHours();
-      const minutes   = startDate.getMinutes();
-      const groupId   = randomUUID();
+      const startDate  = new Date(body.date);
+      const groupId    = randomUUID();
+      const tzOffset   = typeof body.tzOffset === 'number' ? body.tzOffset : 0;
+
+      // Parse local date + time (sent by frontend to avoid timezone day-shift bugs)
+      const localDate = (body.localDate as string) || body.date.slice(0, 10);
+      const localTime = (body.localTime as string) || '18:00';
+      const [localH, localM] = localTime.split(':').map(Number);
+
+      // Convert local time to UTC: tzOffset = getTimezoneOffset() (positive for UTC-N)
+      const utcH = localH + Math.floor(tzOffset / 60);
+      const utcM = localM + (tzOffset % 60);
+
+      // Parse local date components for cursor start
+      const [sy, sm, sd] = localDate.split('-').map(Number);
+
+      // Parse end date (sent as plain "YYYY-MM-DD" from frontend)
+      const endDateStr = body.recurrenceEndDate as string;
+      const [ey, em, ed] = endDateStr.slice(0, 10).split('-').map(Number);
+
+      // Iterate using UTC midnight dates to avoid getDay() timezone drift
+      const cursor  = new Date(Date.UTC(sy, sm - 1, sd));
+      const endDate = new Date(Date.UTC(ey, em - 1, ed, 23, 59, 59));
 
       const trainingsData: {
         teamId: string; date: Date; duration: number;
         location?: string; plan?: string; coachNotes?: string; recurrenceGroupId: string;
       }[] = [];
 
-      const cursor = new Date(startDate);
-      cursor.setHours(0, 0, 0, 0);
-
       while (cursor <= endDate) {
-        if ((body.daysOfWeek as number[]).includes(cursor.getDay())) {
-          const trainingDate = new Date(cursor);
-          trainingDate.setHours(hours, minutes, 0, 0);
+        if ((body.daysOfWeek as number[]).includes(cursor.getUTCDay())) {
+          // Date.UTC handles hour overflow (e.g. utcH=26 rolls to next day 02:00)
+          const trainingDate = new Date(Date.UTC(
+            cursor.getUTCFullYear(), cursor.getUTCMonth(), cursor.getUTCDate(),
+            utcH, utcM, 0,
+          ));
           if (trainingDate >= startDate) {
             trainingsData.push({
               teamId: body.teamId,
@@ -57,7 +75,7 @@ export async function POST(req: NextRequest) {
             });
           }
         }
-        cursor.setDate(cursor.getDate() + 1);
+        cursor.setUTCDate(cursor.getUTCDate() + 1);
       }
 
       if (trainingsData.length === 0) return err('No se generaron fechas de entrenamiento', 'VALIDATION_ERROR', 400);
