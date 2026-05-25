@@ -68,21 +68,43 @@ export async function POST(req: NextRequest) {
   if (auth.role !== 'CLUB_ADMIN' && auth.role !== 'SUPER_ADMIN') return forbidden();
 
   try {
-    const body    = await req.json();
-    const account = await prisma.clubAccount.findFirst({ where: { clubId: auth.clubId } });
-    const balanceAfter = (account?.currentBalance || 0) + (body.type === 'INCOME' ? body.amount : -body.amount);
+    const body   = await req.json();
+    const amount = Number(body.amount);
+    if (!amount || amount <= 0) return err('Monto inválido', 'VALIDATION_ERROR', 400);
 
     const tx = await prisma.$transaction(async (ctx) => {
+      // Ensure ClubAccount exists (create on first use)
+      const account = await ctx.clubAccount.upsert({
+        where:  { clubId: auth.clubId },
+        create: { clubId: auth.clubId, currentBalance: 0 },
+        update: {},
+      });
+
+      const balanceAfter = account.currentBalance + (body.type === 'INCOME' ? amount : -amount);
+
       const transaction = await ctx.cashTransaction.create({
-        data: { ...body, clubId: auth.clubId, createdById: auth.id, date: new Date(body.date), balanceAfter },
+        data: {
+          accountId:       account.id,
+          clubId:          auth.clubId,
+          createdById:     auth.id,
+          type:            body.type,
+          amount,
+          date:            new Date(body.date),
+          concept:         String(body.concept),
+          description:     body.description  || undefined,
+          category:        String(body.category),
+          paymentMethod:   body.paymentMethod   || undefined,
+          referenceNumber: body.referenceNumber || undefined,
+          balanceAfter,
+        },
         include: { createdBy: { select: { firstName: true, lastName: true } } },
       });
-      if (account) {
-        await ctx.clubAccount.update({
-          where: { id: account.id },
-          data: { currentBalance: balanceAfter, lastUpdatedAt: new Date() },
-        });
-      }
+
+      await ctx.clubAccount.update({
+        where: { id: account.id },
+        data:  { currentBalance: balanceAfter, lastUpdatedAt: new Date() },
+      });
+
       return { ...transaction, createdBy: `${transaction.createdBy.firstName} ${transaction.createdBy.lastName}` };
     });
     return ok(tx, 201);
