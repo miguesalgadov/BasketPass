@@ -25,16 +25,56 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const groupId = body.recurrent ? randomUUID() : undefined;
+
+    if (body.recurrent && body.daysOfWeek?.length && body.recurrenceEndDate) {
+      const startDate = new Date(body.date);
+      const endDate   = new Date(body.recurrenceEndDate);
+      const hours     = startDate.getHours();
+      const minutes   = startDate.getMinutes();
+      const groupId   = randomUUID();
+
+      const trainingsData: {
+        teamId: string; date: Date; duration: number;
+        location?: string; plan?: string; coachNotes?: string; recurrenceGroupId: string;
+      }[] = [];
+
+      const cursor = new Date(startDate);
+      cursor.setHours(0, 0, 0, 0);
+
+      while (cursor <= endDate) {
+        if ((body.daysOfWeek as number[]).includes(cursor.getDay())) {
+          const trainingDate = new Date(cursor);
+          trainingDate.setHours(hours, minutes, 0, 0);
+          if (trainingDate >= startDate) {
+            trainingsData.push({
+              teamId: body.teamId,
+              date:   trainingDate,
+              duration: body.duration,
+              ...(body.location   && { location: body.location }),
+              ...(body.plan       && { plan: body.plan }),
+              ...(body.coachNotes && { coachNotes: body.coachNotes }),
+              recurrenceGroupId: groupId,
+            });
+          }
+        }
+        cursor.setDate(cursor.getDate() + 1);
+      }
+
+      if (trainingsData.length === 0) return err('No se generaron fechas de entrenamiento', 'VALIDATION_ERROR', 400);
+
+      await prisma.training.createMany({ data: trainingsData });
+      return ok({ count: trainingsData.length }, 201);
+    }
+
+    // Single training
     const training = await prisma.training.create({
       data: {
         teamId: body.teamId, date: new Date(body.date), duration: body.duration,
         location: body.location, plan: body.plan, coachNotes: body.coachNotes,
-        recurrenceGroupId: groupId,
       },
       include: { team: true },
     });
-    return ok(training, 201);
+    return ok({ count: 1, training }, 201);
   } catch (e: any) {
     return err(e.message, 'CREATE_ERROR', 400);
   }
