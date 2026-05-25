@@ -27,28 +27,29 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
 
     if (body.recurrent && body.daysOfWeek?.length && body.recurrenceEndDate) {
-      const startDate  = new Date(body.date);
-      const groupId    = randomUUID();
-      const tzOffset   = typeof body.tzOffset === 'number' ? body.tzOffset : 0;
+      const startDate = new Date(body.date);
+      const groupId   = randomUUID();
 
-      // Parse local date + time (sent by frontend to avoid timezone day-shift bugs)
+      // Extract UTC time-of-day directly from body.date (already correct UTC from browser)
+      const utcH = startDate.getUTCHours();
+      const utcM = startDate.getUTCMinutes();
+
+      // Compute day-of-week shift between the local calendar date and its UTC weekday.
+      // body.localDate is "YYYY-MM-DD" (the user's intended local date).
+      // Parsing it at noon UTC avoids midnight boundary issues.
       const localDate = (body.localDate as string) || body.date.slice(0, 10);
-      const localTime = (body.localTime as string) || '18:00';
-      const [localH, localM] = localTime.split(':').map(Number);
+      const localUTCDay = new Date(localDate + 'T12:00:00Z').getUTCDay();
+      const dayShift = ((startDate.getUTCDay() - localUTCDay) + 7) % 7;
 
-      // Convert local time to UTC: tzOffset = getTimezoneOffset() (positive for UTC-N)
-      const utcH = localH + Math.floor(tzOffset / 60);
-      const utcM = localM + (tzOffset % 60);
+      // Map each user-selected local weekday to its corresponding UTC weekday
+      const utcDaysOfWeek = (body.daysOfWeek as number[]).map((d) => (d + dayShift) % 7);
 
-      // Parse local date components for cursor start
+      // Cursor iterates UTC calendar dates starting from the local start date
       const [sy, sm, sd] = localDate.split('-').map(Number);
-
-      // Parse end date (sent as plain "YYYY-MM-DD" from frontend)
-      const endDateStr = body.recurrenceEndDate as string;
-      const [ey, em, ed] = endDateStr.slice(0, 10).split('-').map(Number);
-
-      // Iterate using UTC midnight dates to avoid getDay() timezone drift
       const cursor  = new Date(Date.UTC(sy, sm - 1, sd));
+
+      const endDateStr = (body.recurrenceEndDate as string).slice(0, 10);
+      const [ey, em, ed] = endDateStr.split('-').map(Number);
       const endDate = new Date(Date.UTC(ey, em - 1, ed, 23, 59, 59));
 
       const trainingsData: {
@@ -57,16 +58,15 @@ export async function POST(req: NextRequest) {
       }[] = [];
 
       while (cursor <= endDate) {
-        if ((body.daysOfWeek as number[]).includes(cursor.getUTCDay())) {
-          // Date.UTC handles hour overflow (e.g. utcH=26 rolls to next day 02:00)
+        if (utcDaysOfWeek.includes(cursor.getUTCDay())) {
           const trainingDate = new Date(Date.UTC(
             cursor.getUTCFullYear(), cursor.getUTCMonth(), cursor.getUTCDate(),
             utcH, utcM, 0,
           ));
           if (trainingDate >= startDate) {
             trainingsData.push({
-              teamId: body.teamId,
-              date:   trainingDate,
+              teamId:   body.teamId,
+              date:     trainingDate,
               duration: body.duration,
               ...(body.location   && { location: body.location }),
               ...(body.plan       && { plan: body.plan }),

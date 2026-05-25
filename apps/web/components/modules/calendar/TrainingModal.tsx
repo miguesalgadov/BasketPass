@@ -135,8 +135,6 @@ export function TrainingModal({ open, onClose, onSuccess, training }: Props) {
       payload.recurrent         = true;
       payload.daysOfWeek        = daysOfWeek;
       payload.localDate         = data.date;
-      payload.localTime         = data.time;
-      payload.tzOffset          = new Date().getTimezoneOffset();
       payload.recurrenceEndDate = endDate;
     }
 
