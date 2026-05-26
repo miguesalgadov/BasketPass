@@ -1,6 +1,5 @@
 {
-  "installCommand": "cd ../.. && unset npm_config_prefix && npm install",
-  "buildCommand": "npm run build",
+  "buildCommand": "cd ../.. && npm run build --workspace=apps/web",
   "outputDirectory": ".next",
   "framework": "nextjs",
   "env": {
