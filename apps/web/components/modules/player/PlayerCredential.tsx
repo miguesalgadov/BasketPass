@@ -145,7 +145,7 @@ export function PlayerCredential({ player, onAvatarChange, onAvatarDelete, payme
         </div>
 
         {/* Right: player photo */}
-        <div className="absolute top-0 right-0 bottom-0 w-[130px] overflow-hidden">
+        <div className="absolute top-0 right-0 bottom-0 w-[130px] overflow-hidden z-20">
           <img
             src={avatarSrc ?? '/players/pezoa.jpg'}
             alt={player.firstName}
