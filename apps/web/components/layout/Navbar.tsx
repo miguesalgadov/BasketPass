@@ -17,6 +17,7 @@ interface NavbarProps {
 
 export function Navbar({ onMenuClick }: NavbarProps) {
   const { user } = useAuthStore();
+  const isPlayer = user?.role === 'PLAYER';
 
   return (
     <header className="h-16 bg-surface border-b border-border flex items-center px-4 gap-4 flex-shrink-0">
@@ -29,14 +30,16 @@ export function Navbar({ onMenuClick }: NavbarProps) {
       </button>
 
       <div className="flex-1 flex items-center">
-        <div className="relative hidden sm:flex items-center">
-          <Search size={15} className="absolute left-3 text-muted-foreground" />
-          <input
-            type="text"
-            placeholder="Buscar..."
-            className="pl-9 pr-3 py-2 text-sm border border-border rounded-lg bg-muted/50 text-secondary placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary w-64"
-          />
-        </div>
+        {!isPlayer && (
+          <div className="relative hidden sm:flex items-center">
+            <Search size={15} className="absolute left-3 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="Buscar..."
+              className="pl-9 pr-3 py-2 text-sm border border-border rounded-lg bg-muted/50 text-secondary placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary w-64"
+            />
+          </div>
+        )}
       </div>
 
       <div className="flex items-center gap-2">

@@ -153,14 +153,24 @@ export function PlayerCredential({ player, onAvatarChange, paymentStatus = 'OK',
           <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, #0D1525 0%, transparent 45%)' }} />
           <div className="absolute bottom-0 left-0 right-0 h-8" style={{ background: 'linear-gradient(to top, #1A2540 0%, transparent 100%)' }} />
           {onAvatarChange && (
-            <button
-              onClick={onAvatarChange}
-              className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center gap-1 opacity-0 hover:opacity-100 active:opacity-100 transition-opacity"
-              title="Cambiar foto"
-            >
-              <Camera size={20} className="text-white" />
-              <span className="text-[9px] text-white font-medium">Cambiar</span>
-            </button>
+            <>
+              <button
+                onClick={onAvatarChange}
+                className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center gap-1 opacity-0 hover:opacity-100 active:opacity-100 transition-opacity"
+                title="Cambiar foto"
+              >
+                <Camera size={20} className="text-white" />
+                <span className="text-[9px] text-white font-medium">Cambiar</span>
+              </button>
+              {/* Always-visible camera badge for mobile */}
+              <button
+                onClick={onAvatarChange}
+                className="absolute bottom-2 right-2 w-7 h-7 rounded-full bg-primary flex items-center justify-center shadow-lg pointer-events-auto"
+                title="Cambiar foto"
+              >
+                <Camera size={13} className="text-white" />
+              </button>
+            </>
           )}
         </div>
       </div>
