@@ -187,21 +187,29 @@ export default function PlayerDashboardPage() {
       if (!blob) throw new Error('No se pudo generar la imagen (toBlob retornó null)');
       const file = new File([blob], fileName, { type: 'image/png' });
 
-      if (navigator.canShare?.({ files: [file] })) {
-        // Native share sheet — opens WhatsApp, Instagram, etc.
-        await navigator.share({
-          files: [file],
-          title: `Carnet de ${data?.player?.firstName} ${data?.player?.lastName}`,
-        });
-      } else {
-        // Fallback for desktop: download the file
+      const downloadFallback = () => {
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.download = fileName;
         link.href = url;
         link.click();
         URL.revokeObjectURL(url);
-        toast.success('Imagen descargada — compartila desde tu galería');
+        toast.success('Imagen guardada — compartila desde tu galería de fotos');
+      };
+
+      if (navigator.canShare?.({ files: [file] })) {
+        try {
+          await navigator.share({
+            files: [file],
+            title: `Carnet de ${data?.player?.firstName} ${data?.player?.lastName}`,
+          });
+        } catch (shareErr: any) {
+          if (shareErr?.name === 'AbortError') return;
+          // NotAllowedError: browser lost user gesture context after async work → download
+          downloadFallback();
+        }
+      } else {
+        downloadFallback();
       }
     } catch (e: any) {
       if (e?.name !== 'AbortError') {
