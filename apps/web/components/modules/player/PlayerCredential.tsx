@@ -29,46 +29,6 @@ interface Props {
   season?: { matchesPlayed: number; attendanceRate: number };
 }
 
-function QRCode() {
-  return (
-    <div className="rounded-lg overflow-hidden bg-white p-1.5 flex-shrink-0" style={{ width: 80, height: 80 }}>
-      <svg viewBox="0 0 21 21" className="w-full h-full" shapeRendering="crispEdges">
-        {/* Finder: top-left */}
-        <rect x="0" y="0" width="7" height="7" fill="#000" />
-        <rect x="1" y="1" width="5" height="5" fill="#fff" />
-        <rect x="2" y="2" width="3" height="3" fill="#000" />
-        {/* Finder: top-right */}
-        <rect x="14" y="0" width="7" height="7" fill="#000" />
-        <rect x="15" y="1" width="5" height="5" fill="#fff" />
-        <rect x="16" y="2" width="3" height="3" fill="#000" />
-        {/* Finder: bottom-left */}
-        <rect x="0" y="14" width="7" height="7" fill="#000" />
-        <rect x="1" y="15" width="5" height="5" fill="#fff" />
-        <rect x="2" y="16" width="3" height="3" fill="#000" />
-        {/* Timing & data pattern */}
-        {([
-          [8,0],[10,0],[12,0],[9,1],[11,1],[8,2],[10,2],[12,2],
-          [9,3],[11,3],[8,4],[10,4],[9,5],[12,5],[8,6],[11,6],
-          [0,8],[2,8],[4,8],[6,8],[8,8],[10,8],[12,8],[14,8],[16,8],[18,8],[20,8],
-          [1,9],[4,9],[7,9],[9,9],[11,9],[14,9],[17,9],[19,9],
-          [0,10],[3,10],[5,10],[8,10],[10,10],[12,10],[15,10],[18,10],[20,10],
-          [2,11],[4,11],[6,11],[9,11],[11,11],[13,11],[16,11],[19,11],
-          [1,12],[3,12],[5,12],[8,12],[10,12],[12,12],[14,12],[17,12],[20,12],
-          [8,13],[10,13],[13,13],[15,13],[18,13],
-          [8,14],[11,14],[14,14],[16,14],[19,14],
-          [9,15],[12,15],[14,15],[17,15],[20,15],
-          [8,16],[10,16],[13,16],[15,16],[18,16],
-          [9,17],[11,17],[14,17],[16,17],[19,17],
-          [8,18],[12,18],[14,18],[17,18],[20,18],
-          [9,19],[11,19],[13,19],[15,19],[18,19],
-          [8,20],[10,20],[12,20],[14,20],[16,20],[19,20],
-        ] as [number,number][]).map(([x, y], i) => (
-          <rect key={i} x={x} y={y} width="1" height="1" fill="#000" />
-        ))}
-      </svg>
-    </div>
-  );
-}
 
 const PAYMENT_LABEL: Record<string, { label: string; color: string }> = {
   OK:      { label: 'Al día',    color: '#22C55E' },
@@ -190,7 +150,7 @@ export function PlayerCredential({ player, onAvatarChange, onAvatarDelete, payme
         </div>
       </div>
 
-      {/* ── ID + QR ── */}
+      {/* ── ID + Dorsal ── */}
       <div className="mx-5 border-t border-white/10" />
       <div className="px-5 py-4 flex items-start justify-between gap-3">
         <div className="space-y-2 flex-1">
@@ -212,7 +172,14 @@ export function PlayerCredential({ player, onAvatarChange, onAvatarDelete, payme
             <span className="text-[9px] text-emerald-400 font-semibold tracking-wide">Carnet verificado</span>
           </div>
         </div>
-        <QRCode />
+        <div className="flex-shrink-0 flex items-center justify-center" style={{ width: 80, height: 80 }}>
+          <span
+            className="font-black leading-none text-white/20 select-none"
+            style={{ fontSize: player.jerseyNumber != null ? (String(player.jerseyNumber).length > 2 ? 44 : 64) : 48 }}
+          >
+            {player.jerseyNumber ?? '—'}
+          </span>
+        </div>
       </div>
 
       {/* ── Datos clave ── */}
