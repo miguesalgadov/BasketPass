@@ -108,7 +108,6 @@ export default function PlayerDashboardPage() {
         backgroundColor: null,
         scale: 3,
         useCORS: true,
-        allowTaint: true,
         logging: false,
         onclone: (_doc, element) => {
           // Fix 1: player photo — html2canvas doesn't handle object-fit:cover
@@ -131,18 +130,18 @@ export default function PlayerDashboardPage() {
             parent.style.backgroundRepeat = 'no-repeat';
             clubLogo.style.display = 'none';
           }
-          // Fix 3: resolve currentColor in Lucide SVG icons — html2canvas doesn't
-          // propagate the CSS `color` property into SVG stroke/fill attributes.
-          // Only SVGs with an explicit inline style.color (i.e. Lucide icons) are patched;
-          // our custom header/footer SVGs have no style.color and are left untouched.
-          element.querySelectorAll('svg').forEach((svg) => {
-            const color = (svg as HTMLElement).style.color;
-            if (!color) return;
-            svg.querySelectorAll('[stroke="currentColor"]').forEach((el) => el.setAttribute('stroke', color));
-            svg.querySelectorAll('[fill="currentColor"]').forEach((el) => el.setAttribute('fill', color));
-            if (svg.getAttribute('stroke') === 'currentColor') svg.setAttribute('stroke', color);
-            if (svg.getAttribute('fill')   === 'currentColor') svg.setAttribute('fill',   color);
-          });
+          // Fix 3: resolve currentColor in Lucide SVG icons
+          // html2canvas doesn't propagate the CSS `color` property into SVG stroke/fill.
+          try {
+            element.querySelectorAll('svg').forEach((svg) => {
+              const color = (svg as HTMLElement).style.color;
+              if (!color) return;
+              svg.querySelectorAll('[stroke="currentColor"]').forEach((el) => el.setAttribute('stroke', color));
+              svg.querySelectorAll('[fill="currentColor"]').forEach((el)   => el.setAttribute('fill',   color));
+              if (svg.getAttribute('stroke') === 'currentColor') svg.setAttribute('stroke', color);
+              if (svg.getAttribute('fill')   === 'currentColor') svg.setAttribute('fill',   color);
+            });
+          } catch (_) { /* non-fatal — icons may render without correct color */ }
         },
       });
 
@@ -170,7 +169,8 @@ export default function PlayerDashboardPage() {
       ctx.drawImage(cardCanvas, x, y, cardW, cardH);
 
       const fileName = `carnet-${data?.player?.lastName?.toLowerCase() ?? 'jugador'}.png`;
-      const blob = await new Promise<Blob>((resolve) => story.toBlob((b) => resolve(b!), 'image/png'));
+      const blob = await new Promise<Blob | null>((resolve) => story.toBlob(resolve, 'image/png'));
+      if (!blob) throw new Error('No se pudo generar la imagen (toBlob retornó null)');
       const file = new File([blob], fileName, { type: 'image/png' });
 
       if (navigator.canShare?.({ files: [file] })) {
@@ -190,7 +190,10 @@ export default function PlayerDashboardPage() {
         toast.success('Imagen descargada — compartila desde tu galería');
       }
     } catch (e: any) {
-      if (e?.name !== 'AbortError') toast.error('Error al compartir la imagen');
+      if (e?.name !== 'AbortError') {
+        console.error('[ShareStory]', e);
+        toast.error(`Error al compartir: ${e?.message ?? e}`);
+      }
     } finally {
       setSharing(false);
       setCapturing(false);
