@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { Download, Loader2 } from 'lucide-react';
+import { Share2, Loader2 } from 'lucide-react';
 import { api } from '@/lib/api';
 import toast from 'react-hot-toast';
 import { PlayerCredential } from '@/components/modules/player/PlayerCredential';
@@ -48,7 +48,7 @@ function ShareStoryButton({ onClick, loading }: { onClick: () => void; loading: 
     >
       {loading
         ? <><Loader2 size={15} className="animate-spin" /> Generando...</>
-        : <><Download size={15} /> Guardar como historia</>}
+        : <><Share2 size={15} /> Compartir carnet</>}
     </button>
   );
 }
@@ -131,13 +131,28 @@ export default function PlayerDashboardPage() {
 
       ctx.drawImage(cardCanvas, x, y, cardW, cardH);
 
-      const link    = document.createElement('a');
-      link.download = `carnet-${data?.player?.lastName?.toLowerCase() ?? 'jugador'}.png`;
-      link.href     = story.toDataURL('image/png');
-      link.click();
-      toast.success('Historia guardada — compartila desde tu galería');
-    } catch {
-      toast.error('Error al generar la imagen');
+      const fileName = `carnet-${data?.player?.lastName?.toLowerCase() ?? 'jugador'}.png`;
+      const blob = await new Promise<Blob>((resolve) => story.toBlob((b) => resolve(b!), 'image/png'));
+      const file = new File([blob], fileName, { type: 'image/png' });
+
+      if (navigator.canShare?.({ files: [file] })) {
+        // Native share sheet — opens WhatsApp, Instagram, etc.
+        await navigator.share({
+          files: [file],
+          title: `Carnet de ${data?.player?.firstName} ${data?.player?.lastName}`,
+        });
+      } else {
+        // Fallback for desktop: download the file
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.download = fileName;
+        link.href = url;
+        link.click();
+        URL.revokeObjectURL(url);
+        toast.success('Imagen descargada — compartila desde tu galería');
+      }
+    } catch (e: any) {
+      if (e?.name !== 'AbortError') toast.error('Error al compartir la imagen');
     } finally {
       setSharing(false);
     }
