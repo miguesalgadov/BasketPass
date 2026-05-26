@@ -1,6 +1,7 @@
 'use client';
 
-import { Camera, ShieldCheck, Trash2, Users, Trophy, Zap, CheckCircle2 } from 'lucide-react';
+import { useEffect, useRef } from 'react';
+import { Camera, Trash2 } from 'lucide-react';
 
 interface Club  { name: string; primaryColor?: string | null; slug?: string | null; logo?: string | null }
 interface Team  { name: string; category: string }
@@ -50,6 +51,33 @@ const POSITIONS: Record<string, string> = {
   C:  'Pívot',
 };
 
+function makeSvgDataUrl(paths: string, color: string, size: number): string {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${paths}</svg>`;
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+}
+
+function SvgIcon({ paths, color, size, style }: { paths: string; color: string; size: number; style?: React.CSSProperties }) {
+  const ref = useRef<HTMLCanvasElement>(null);
+  useEffect(() => {
+    const canvas = ref.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    const img = new Image();
+    img.onload = () => { ctx.clearRect(0, 0, size, size); ctx.drawImage(img, 0, 0, size, size); };
+    img.src = makeSvgDataUrl(paths, color, size);
+  }, [paths, color, size]);
+  return <canvas ref={ref} width={size} height={size} style={{ display: 'block', ...style }} />;
+}
+
+const ICON_PATHS = {
+  users:        '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+  checkCircle2: '<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>',
+  trophy:       '<path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>',
+  zap:          '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>',
+  shieldCheck:  '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/><path d="m9 12 2 2 4-4"/>',
+};
+
 export function PlayerCredential({ player, onAvatarChange, onAvatarDelete, paymentStatus = 'OK', season, capturing = false }: Props) {
   const club    = player.club;
   const accent  = club?.primaryColor || '#F97316';
@@ -64,10 +92,10 @@ export function PlayerCredential({ player, onAvatarChange, onAvatarDelete, payme
     : null;
 
   const stats = [
-    { Icon: Users,       label: 'Equipo',        value: player.team?.name ?? '—',                    color: '#1A2542' },
-    { Icon: CheckCircle2,label: 'Estado cuota',   value: pm.label,                                    color: pm.color  },
-    { Icon: Trophy,      label: 'Partidos',       value: String(season?.matchesPlayed ?? 0),           color: '#1A2542' },
-    { Icon: Zap,         label: 'Asistencias',    value: String(season?.totalAssists ?? 0),            color: '#1A2542' },
+    { iconPaths: ICON_PATHS.users,        iconColor: '#1A2542', label: 'Equipo',        value: player.team?.name ?? '—',                    color: '#1A2542' },
+    { iconPaths: ICON_PATHS.checkCircle2, iconColor: pm.color,  label: 'Estado cuota',  value: pm.label,                                    color: pm.color  },
+    { iconPaths: ICON_PATHS.trophy,       iconColor: '#1A2542', label: 'Partidos',       value: String(season?.matchesPlayed ?? 0),           color: '#1A2542' },
+    { iconPaths: ICON_PATHS.zap,          iconColor: '#1A2542', label: 'Asistencias',   value: String(season?.totalAssists ?? 0),            color: '#1A2542' },
   ];
 
   return (
@@ -214,7 +242,7 @@ export function PlayerCredential({ player, onAvatarChange, onAvatarDelete, payme
         {/* Verified */}
         <div style={{ background: '#fff', borderRadius: 8, padding: '9px 12px', display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12, boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
           <div style={{ width: 30, height: 30, background: '#1A2542', borderRadius: 7, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <ShieldCheck size={15} color="#fff" />
+            <SvgIcon paths={ICON_PATHS.shieldCheck} color="#fff" size={15} />
           </div>
           <div>
             <p style={{ fontSize: 9, fontWeight: 700, color: '#1A2542', textTransform: 'uppercase', letterSpacing: '0.08em', margin: 0 }}>Carnet Verificado</p>
@@ -226,9 +254,9 @@ export function PlayerCredential({ player, onAvatarChange, onAvatarDelete, payme
         <div style={{ paddingBottom: 14 }}>
           <p style={{ fontSize: 7, color: '#8896B0', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: 10, marginTop: 0 }}>Datos Clave</p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6 }}>
-            {stats.map(({ Icon, label, value, color }) => (
+            {stats.map(({ iconPaths, iconColor, label, value, color }) => (
               <div key={label} style={{ textAlign: 'center', background: '#fff', borderRadius: 8, padding: '8px 4px', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
-                <Icon size={14} color="#1A2542" style={{ display: 'block', margin: '0 auto 4px' }} />
+                <SvgIcon paths={iconPaths} color={iconColor} size={14} style={{ margin: '0 auto 4px' }} />
                 <p style={{ fontSize: 6.5, color: '#8896B0', margin: '0 0 2px', letterSpacing: '0.3px', lineHeight: 1.2 }}>{label}</p>
                 <p style={{ fontSize: 11, fontWeight: 700, color, margin: 0, lineHeight: 1 }}>{value}</p>
               </div>
