@@ -73,33 +73,34 @@ export function PlayerCredential({ player, onAvatarChange, onAvatarDelete, payme
   return (
     <div style={{ fontFamily: "'Inter', system-ui, -apple-system, sans-serif", borderRadius: 16, overflow: 'hidden', boxShadow: '0 24px 64px rgba(0,0,0,0.35)', width: '100%' }}>
 
-      {/* ── HEADER: BasketPass branding ── */}
-      <div style={{ background: accent, padding: '10px 16px', display: 'flex', alignItems: 'center', gap: 8 }}>
-        {/* BasketPass icon: basketball flying through ticket */}
-        <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
-          {/* Ticket outline */}
-          <rect x="9" y="2" width="20" height="26" rx="3" fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.55)" strokeWidth="1.4"/>
-          {/* Ticket notch left side */}
-          <path d="M9 11.5 Q5.5 11.5 5.5 15 Q5.5 18.5 9 18.5" stroke="rgba(255,255,255,0.55)" strokeWidth="1.4" fill={accent}/>
-          {/* Dashed perforation line */}
-          <line x1="9" y1="15" x2="29" y2="15" stroke="rgba(255,255,255,0.25)" strokeWidth="0.8" strokeDasharray="2 2"/>
-          {/* Basketball */}
-          <circle cx="10" cy="15" r="8" fill="white"/>
+      {/* ── HEADER: BasketPass branding — always dark, never club color ── */}
+      <div style={{ background: '#0D1530', padding: '10px 16px', display: 'flex', alignItems: 'center', gap: 9 }}>
+        {/* BasketPass logo icon: orange basketball flying into ticket */}
+        <svg width="34" height="28" viewBox="0 0 34 26" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
+          {/* Ticket outline (landscape) */}
+          <rect x="11" y="1" width="22" height="24" rx="3.5" fill="none" stroke="white" strokeWidth="1.6"/>
+          {/* Perforation dashed line */}
+          <line x1="26.5" y1="3.5" x2="26.5" y2="22.5" stroke="rgba(255,255,255,0.2)" strokeWidth="0.8" strokeDasharray="2 2"/>
+          {/* Blue perforation dots (right side) */}
+          <circle cx="29" cy="8"    r="1.1" fill="#60A5FA"/>
+          <circle cx="29" cy="13"   r="1.1" fill="#60A5FA"/>
+          <circle cx="29" cy="18"   r="1.1" fill="#60A5FA"/>
+          {/* Orange basketball overlapping left edge of ticket */}
+          <circle cx="15" cy="13" r="10" fill="#F97316"/>
           {/* Basketball seam lines */}
-          <path d="M2.5 15 Q10 9.5 17.5 15" stroke="rgba(0,0,0,0.22)" strokeWidth="0.9" fill="none"/>
-          <path d="M2.5 15 Q10 20.5 17.5 15" stroke="rgba(0,0,0,0.22)" strokeWidth="0.9" fill="none"/>
-          <line x1="10" y1="7" x2="10" y2="23" stroke="rgba(0,0,0,0.22)" strokeWidth="0.9"/>
-          {/* Speed lines */}
-          <line x1="20" y1="10" x2="26" y2="10" stroke="rgba(255,255,255,0.65)" strokeWidth="1.5" strokeLinecap="round"/>
-          <line x1="19.5" y1="14" x2="27" y2="14" stroke="rgba(255,255,255,0.45)" strokeWidth="1" strokeLinecap="round"/>
-          <line x1="19.5" y1="16" x2="27" y2="16" stroke="rgba(255,255,255,0.45)" strokeWidth="1" strokeLinecap="round"/>
-          <line x1="20" y1="20" x2="26" y2="20" stroke="rgba(255,255,255,0.65)" strokeWidth="1.5" strokeLinecap="round"/>
+          <path d="M5.5 13 Q15 7.5 24.5 13"  stroke="white" strokeWidth="1.1" fill="none"/>
+          <path d="M5.5 13 Q15 18.5 24.5 13" stroke="white" strokeWidth="1.1" fill="none"/>
+          <line x1="15" y1="3" x2="15" y2="23" stroke="white" strokeWidth="1.1"/>
+          {/* Speed lines to the left (orange x2 + blue x1) */}
+          <line x1="0.5" y1="8.5"  x2="5" y2="8.5"  stroke="#F97316" strokeWidth="2.2" strokeLinecap="round"/>
+          <line x1="2"   y1="13"   x2="5" y2="13"   stroke="#F97316" strokeWidth="1.7" strokeLinecap="round"/>
+          <line x1="1"   y1="17.5" x2="5" y2="17.5" stroke="#60A5FA" strokeWidth="1.7" strokeLinecap="round"/>
         </svg>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 0 }}>
           <span style={{ color: '#fff', fontWeight: 900, fontSize: 17, letterSpacing: '-0.3px' }}>Basket</span>
-          <span style={{ color: 'rgba(255,255,255,0.75)', fontWeight: 900, fontSize: 17, letterSpacing: '-0.3px' }}>Pass</span>
+          <span style={{ color: '#F97316', fontWeight: 900, fontSize: 17, letterSpacing: '-0.3px' }}>Pass</span>
         </div>
-        <span style={{ marginLeft: 'auto', fontSize: 8, color: 'rgba(255,255,255,0.6)', letterSpacing: '2px', textTransform: 'uppercase' }}>Carnet Digital</span>
+        <span style={{ marginLeft: 'auto', fontSize: 8, color: 'rgba(255,255,255,0.5)', letterSpacing: '2px', textTransform: 'uppercase' }}>Carnet Digital</span>
       </div>
 
       {/* ── DARK HERO ── */}
