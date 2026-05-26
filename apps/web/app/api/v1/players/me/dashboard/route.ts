@@ -67,7 +67,10 @@ export async function GET(req: NextRequest) {
   const paymentStatus = overdueCount === 0 ? 'OK' : overdueCount === 1 ? 'WARNING' : 'DANGER';
 
   // Season stats
-  const matchesPlayed = stats.length;
+  const matchesPlayed  = stats.length;
+  const totalPoints    = stats.reduce((s, r) => s + r.points, 0);
+  const totalAssists   = stats.reduce((s, r) => s + r.assists, 0);
+  const totalRebounds  = stats.reduce((s, r) => s + r.rebounds, 0);
   const wins = stats.filter((s) =>
     s.match.scoreHome != null && s.match.scoreAway != null &&
     (s.match.isHome ? s.match.scoreHome > s.match.scoreAway! : s.match.scoreAway! > s.match.scoreHome)
@@ -130,7 +133,7 @@ export async function GET(req: NextRequest) {
       feeType:       f.feeType,
     })),
     upcomingEvents,
-    season: { matchesPlayed, wins, losses, attendanceRate, callups },
+    season: { matchesPlayed, wins, losses, attendanceRate, callups, totalPoints, totalAssists, totalRebounds },
     recentStats: stats.map((s) => ({
       matchId:   s.matchId,
       matchDate: s.match.date.toISOString(),

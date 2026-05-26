@@ -32,7 +32,7 @@ interface DashboardData {
   paymentStatus: PaymentStatusLevel;
   fees: { id: string; month: number; year: number; status: string; amount: number; paidAmount?: number | null; paidAt?: string | null; dueDate: string }[];
   upcomingEvents: ActivityEvent[];
-  season: { matchesPlayed: number; wins: number; losses: number; attendanceRate: number; callups: number };
+  season: { matchesPlayed: number; wins: number; losses: number; attendanceRate: number; callups: number; totalPoints: number; totalAssists: number; totalRebounds: number };
   recentStats: { matchId: string; matchDate: string; opponent: string; points: number; rebounds: number; assists: number; minutes: number }[];
 }
 
