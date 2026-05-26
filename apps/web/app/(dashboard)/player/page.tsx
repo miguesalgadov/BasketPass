@@ -77,15 +77,13 @@ async function buildStoryFile(element: HTMLDivElement, lastName: string): Promis
           photo.style.display = 'none';
         }
 
-        // Fix club logo
+        // Fix club logo — render <img> directly at full capture resolution.
+        // background-image workaround renders at CSS size (90px), not scale:3 size (270px).
         const clubLogo = el.querySelector('[data-club-logo]') as HTMLImageElement | null;
-        if (clubLogo?.parentElement) {
-          const p = clubLogo.parentElement as HTMLElement;
-          p.style.backgroundImage = `url("${clubLogo.src}")`;
-          p.style.backgroundSize = 'contain';
-          p.style.backgroundPosition = 'center';
-          p.style.backgroundRepeat = 'no-repeat';
-          clubLogo.style.display = 'none';
+        if (clubLogo) {
+          clubLogo.style.objectFit = 'fill';
+          clubLogo.style.width = '100%';
+          clubLogo.style.height = '100%';
         }
 
         // Fix SVG stroke inheritance
