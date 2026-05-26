@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import toast from 'react-hot-toast';
 import { PlayerCredential } from '@/components/modules/player/PlayerCredential';
@@ -41,7 +41,6 @@ function SkeletonCard({ h = 'h-40' }: { h?: string }) {
 export default function PlayerDashboardPage() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     api.get('/players/me/dashboard')
@@ -50,42 +49,31 @@ export default function PlayerDashboardPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  const handleAvatarFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const handleAvatarFileChange = async (file: File) => {
     const formData = new FormData();
     formData.append('avatar', file);
     try {
       const res = await api.post('/players/me/avatar', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
-      setData((prev) => prev ? { ...prev, player: { ...prev.player, photoUrl: res.data.data.avatarUrl } } : prev);
+      setData((prev) => prev ? { ...prev, player: { ...prev.player!, photoUrl: res.data.data.avatarUrl } } : prev);
       toast.success('Foto actualizada');
     } catch {
       toast.error('Error al subir la foto');
     }
-    e.target.value = '';
   };
 
   const accent = data?.player?.club?.primaryColor ?? '#F97316';
 
   return (
     <div className="min-h-screen bg-[#0F1117] -m-4 lg:-m-6 p-4 lg:p-6 pb-24 lg:pb-6">
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        className="hidden"
-        onChange={handleAvatarFileChange}
-      />
-
       {/* ── MOBILE LAYOUT ── */}
       <div className="flex flex-col lg:hidden gap-3">
         {/* Greeting */}
         <div className="pt-1">
           <p className="text-xs text-white/40 uppercase tracking-widest mb-0.5">Bienvenido</p>
           <h1 className="text-xl font-black text-white">
-            {loading ? '...' : `${data?.player.firstName} ${data?.player.lastName}`}
+            {loading ? '...' : `${data?.player?.firstName} ${data?.player?.lastName}`}
           </h1>
         </div>
 
@@ -98,7 +86,7 @@ export default function PlayerDashboardPage() {
           </>
         ) : data?.player ? (
           <>
-            <PlayerCredential player={data.player} onAvatarChange={() => fileInputRef.current?.click()} paymentStatus={data.paymentStatus} season={data.season} />
+            <PlayerCredential player={data.player} onAvatarChange={handleAvatarFileChange} paymentStatus={data.paymentStatus} season={data.season} />
             <PaymentStatusBadge status={data.paymentStatus} fees={data.fees} />
             <UpcomingActivities events={data.upcomingEvents} />
             <SeasonSummaryBar stats={data.season} />
@@ -113,7 +101,7 @@ export default function PlayerDashboardPage() {
         <div className="mb-4">
           <p className="text-xs text-white/40 uppercase tracking-widest mb-0.5">Bienvenido</p>
           <h1 className="text-2xl font-black text-white">
-            {loading ? '...' : `${data?.player.firstName} ${data?.player.lastName}`}
+            {loading ? '...' : `${data?.player?.firstName} ${data?.player?.lastName}`}
           </h1>
         </div>
 
@@ -133,7 +121,7 @@ export default function PlayerDashboardPage() {
         ) : data?.player ? (
           <div className="grid grid-cols-[320px_1fr] gap-4">
             <div className="space-y-3">
-              <PlayerCredential player={data.player} onAvatarChange={() => fileInputRef.current?.click()} paymentStatus={data.paymentStatus} season={data.season} />
+              <PlayerCredential player={data.player} onAvatarChange={handleAvatarFileChange} paymentStatus={data.paymentStatus} season={data.season} />
               <PaymentStatusBadge status={data.paymentStatus} fees={data.fees} />
             </div>
             <div className="space-y-3">

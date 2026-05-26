@@ -23,7 +23,7 @@ interface PlayerData {
 
 interface Props {
   player: PlayerData;
-  onAvatarChange?: () => void;
+  onAvatarChange?: (file: File) => void;
   paymentStatus?: string;
   season?: { matchesPlayed: number; attendanceRate: number };
 }
@@ -154,22 +154,32 @@ export function PlayerCredential({ player, onAvatarChange, paymentStatus = 'OK',
           <div className="absolute bottom-0 left-0 right-0 h-8" style={{ background: 'linear-gradient(to top, #1A2540 0%, transparent 100%)' }} />
           {onAvatarChange && (
             <>
-              <button
-                onClick={onAvatarChange}
-                className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center gap-1 opacity-0 hover:opacity-100 active:opacity-100 transition-opacity"
-                title="Cambiar foto"
+              <input
+                id="player-avatar-input"
+                type="file"
+                accept="image/*"
+                className="sr-only"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) onAvatarChange(file);
+                  e.target.value = '';
+                }}
+              />
+              {/* Hover overlay */}
+              <label
+                htmlFor="player-avatar-input"
+                className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center gap-1 opacity-0 hover:opacity-100 active:opacity-100 transition-opacity cursor-pointer"
               >
                 <Camera size={20} className="text-white" />
                 <span className="text-[9px] text-white font-medium">Cambiar</span>
-              </button>
-              {/* Always-visible camera badge for mobile */}
-              <button
-                onClick={onAvatarChange}
-                className="absolute bottom-2 right-2 w-7 h-7 rounded-full bg-primary flex items-center justify-center shadow-lg pointer-events-auto"
-                title="Cambiar foto"
+              </label>
+              {/* Always-visible badge */}
+              <label
+                htmlFor="player-avatar-input"
+                className="absolute bottom-2 right-2 w-7 h-7 rounded-full bg-primary flex items-center justify-center shadow-lg cursor-pointer"
               >
                 <Camera size={13} className="text-white" />
-              </button>
+              </label>
             </>
           )}
         </div>
