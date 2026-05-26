@@ -51,9 +51,31 @@ const POSITIONS: Record<string, string> = {
   C:  'Pívot',
 };
 
-function makeSvgDataUrl(paths: string, color: string, size: number): string {
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${paths}</svg>`;
-  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+function drawIconPaths(ctx: CanvasRenderingContext2D, pathsHtml: string, color: string, iconSize: number): void {
+  const scale = iconSize / 24;
+  ctx.save();
+  ctx.scale(scale, scale);
+  ctx.strokeStyle = color;
+  ctx.fillStyle = 'none';
+  ctx.lineWidth = 2;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  // <path d="...">
+  for (const m of pathsHtml.matchAll(/\bd="([^"]+)"/g)) {
+    ctx.stroke(new Path2D(m[1]));
+  }
+  // <circle cx cy r>
+  for (const m of pathsHtml.matchAll(/cx="([^"]+)"\s+cy="([^"]+)"\s+r="([^"]+)"/g)) {
+    ctx.beginPath(); ctx.arc(+m[1], +m[2], +m[3], 0, Math.PI * 2); ctx.stroke();
+  }
+  // <polygon points="...">
+  for (const m of pathsHtml.matchAll(/points="([^"]+)"/g)) {
+    const pts = m[1].trim().split(/\s+/).map(Number);
+    ctx.beginPath();
+    for (let i = 0; i < pts.length; i += 2) { i === 0 ? ctx.moveTo(pts[i], pts[i+1]) : ctx.lineTo(pts[i], pts[i+1]); }
+    ctx.closePath(); ctx.stroke();
+  }
+  ctx.restore();
 }
 
 function SvgIcon({ paths, color, size, style }: { paths: string; color: string; size: number; style?: React.CSSProperties }) {
@@ -63,9 +85,8 @@ function SvgIcon({ paths, color, size, style }: { paths: string; color: string; 
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-    const img = new Image();
-    img.onload = () => { ctx.clearRect(0, 0, size, size); ctx.drawImage(img, 0, 0, size, size); };
-    img.src = makeSvgDataUrl(paths, color, size);
+    ctx.clearRect(0, 0, size, size);
+    drawIconPaths(ctx, paths, color, size);
   }, [paths, color, size]);
   return <canvas ref={ref} width={size} height={size} style={{ display: 'block', ...style }} />;
 }
