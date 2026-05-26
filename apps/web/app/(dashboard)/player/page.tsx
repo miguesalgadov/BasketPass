@@ -67,7 +67,7 @@ export default function PlayerDashboardPage() {
     e.target.value = '';
   };
 
-  const accent = data?.player.club?.primaryColor ?? '#F97316';
+  const accent = data?.player?.club?.primaryColor ?? '#F97316';
 
   return (
     <div className="min-h-screen bg-[#0F1117] -m-4 lg:-m-6 p-4 lg:p-6 pb-24 lg:pb-6">
@@ -96,7 +96,7 @@ export default function PlayerDashboardPage() {
             <SkeletonCard h="h-40" />
             <SkeletonCard h="h-28" />
           </>
-        ) : data ? (
+        ) : data?.player ? (
           <>
             <PlayerCredential player={data.player} onAvatarChange={() => fileInputRef.current?.click()} paymentStatus={data.paymentStatus} season={data.season} />
             <PaymentStatusBadge status={data.paymentStatus} fees={data.fees} />
@@ -130,7 +130,7 @@ export default function PlayerDashboardPage() {
               <SkeletonCard h="h-56" />
             </div>
           </div>
-        ) : data ? (
+        ) : data?.player ? (
           <div className="grid grid-cols-[320px_1fr] gap-4">
             <div className="space-y-3">
               <PlayerCredential player={data.player} onAvatarChange={() => fileInputRef.current?.click()} paymentStatus={data.paymentStatus} season={data.season} />
