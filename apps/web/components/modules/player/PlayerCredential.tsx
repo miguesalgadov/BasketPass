@@ -133,13 +133,13 @@ export function PlayerCredential({ player, onAvatarChange, onAvatarDelete, payme
                   className="hover:opacity-100 active:opacity-100">
                   <input type="file" accept="image/*" style={{ position: 'absolute', inset: 0, opacity: 0, cursor: 'pointer', width: '100%', height: '100%' }}
                     onChange={(e) => { const f = e.target.files?.[0]; if (f) onAvatarChange(f); e.target.value = ''; }} />
-                  <Camera size={20} style={{ color: '#fff', pointerEvents: 'none' }} />
+                  <Camera size={20} stroke="#fff" fill="none" style={{ pointerEvents: 'none' }} />
                   <span style={{ fontSize: 9, color: '#fff', fontWeight: 500, pointerEvents: 'none' }}>Cambiar</span>
                 </label>
                 <label style={{ position: 'absolute', bottom: 8, right: 8, width: 28, height: 28, borderRadius: '50%', background: accent, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 2px 8px rgba(0,0,0,0.4)', overflow: 'hidden', zIndex: 20 }}>
                   <input type="file" accept="image/*" style={{ position: 'absolute', inset: 0, opacity: 0, cursor: 'pointer', width: '100%', height: '100%' }}
                     onChange={(e) => { const f = e.target.files?.[0]; if (f) onAvatarChange(f); e.target.value = ''; }} />
-                  <Camera size={13} style={{ color: '#fff', pointerEvents: 'none' }} />
+                  <Camera size={13} stroke="#fff" fill="none" style={{ pointerEvents: 'none' }} />
                 </label>
               </>
             )}
@@ -214,7 +214,7 @@ export function PlayerCredential({ player, onAvatarChange, onAvatarDelete, payme
         {/* Verified */}
         <div style={{ background: '#fff', borderRadius: 8, padding: '9px 12px', display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12, boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
           <div style={{ width: 30, height: 30, background: '#1A2542', borderRadius: 7, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <ShieldCheck size={15} style={{ color: '#fff' }} />
+            <ShieldCheck size={15} stroke="#fff" fill="none" />
           </div>
           <div>
             <p style={{ fontSize: 9, fontWeight: 700, color: '#1A2542', textTransform: 'uppercase', letterSpacing: '0.08em', margin: 0 }}>Carnet Verificado</p>
@@ -228,7 +228,7 @@ export function PlayerCredential({ player, onAvatarChange, onAvatarDelete, payme
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6 }}>
             {stats.map(({ Icon, label, value, color }) => (
               <div key={label} style={{ textAlign: 'center', background: '#fff', borderRadius: 8, padding: '8px 4px', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
-                <Icon size={14} style={{ color: accent, display: 'block', margin: '0 auto 4px' }} />
+                <Icon size={14} stroke={accent} fill="none" style={{ display: 'block', margin: '0 auto 4px' }} />
                 <p style={{ fontSize: 6.5, color: '#8896B0', margin: '0 0 2px', letterSpacing: '0.3px', lineHeight: 1.2 }}>{label}</p>
                 <p style={{ fontSize: 11, fontWeight: 700, color, margin: 0, lineHeight: 1 }}>{value}</p>
               </div>
