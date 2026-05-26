@@ -169,9 +169,9 @@ export function PlayerCredential({ player, onAvatarChange, onAvatarDelete, payme
             <p className="text-xs font-bold text-white/80">31/12/{year}</p>
           </div>
           {/* Verified badge */}
-          <div className="flex items-center gap-1.5 bg-emerald-500/15 border border-emerald-500/30 rounded-full px-2.5 py-1 w-fit mt-1" style={{ display: 'flex', alignItems: 'center' }}>
-            <ShieldCheck size={11} className="text-emerald-400" style={{ flexShrink: 0 }} />
-            <span className="text-[9px] text-emerald-400 font-semibold tracking-wide" style={{ lineHeight: 1 }}>Carnet verificado</span>
+          <div className="bg-emerald-500/15 border border-emerald-500/30 rounded-full px-2.5 py-1 w-fit mt-1" style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+            <ShieldCheck size={11} style={{ color: '#34d399', display: 'inline-block', verticalAlign: 'middle', flexShrink: 0 }} />
+            <span style={{ fontSize: 9, color: '#34d399', fontWeight: 600, letterSpacing: '0.025em', lineHeight: 1, display: 'inline-block', verticalAlign: 'middle' }}>Carnet verificado</span>
           </div>
         </div>
         <div className="flex-shrink-0 flex items-center justify-center" style={{ width: 80, height: 80 }}>
@@ -195,9 +195,9 @@ export function PlayerCredential({ player, onAvatarChange, onAvatarDelete, payme
           </div>
           <div>
             <p className="text-[8px] text-white/35">Estado cuota</p>
-            <div className="flex items-center gap-1" style={{ display: 'flex', alignItems: 'center' }}>
-              <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: pm.color, flexShrink: 0 }} />
-              <p className="text-xs font-bold" style={{ color: pm.color, lineHeight: 1 }}>{pm.label}</p>
+            <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+              <span style={{ background: pm.color, width: 6, height: 6, borderRadius: '50%', display: 'inline-block', verticalAlign: 'middle', flexShrink: 0 }} />
+              <p style={{ color: pm.color, fontSize: 12, fontWeight: 700, lineHeight: 1, display: 'inline-block', verticalAlign: 'middle' }}>{pm.label}</p>
             </div>
           </div>
           <div>
