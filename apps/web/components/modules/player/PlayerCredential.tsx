@@ -86,7 +86,7 @@ export function PlayerCredential({ player, onAvatarChange, onAvatarDelete, payme
 
   const apiBase = process.env.NEXT_PUBLIC_API_URL ?? '';
   const avatarSrc = player.photoUrl
-    ? (player.photoUrl.startsWith('http') ? player.photoUrl : `${apiBase}${player.photoUrl}`)
+    ? (player.photoUrl.startsWith('http') || player.photoUrl.startsWith('data:') ? player.photoUrl : `${apiBase}${player.photoUrl}`)
     : null;
 
   return (
