@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { flushSync } from 'react-dom';
 import { Share2, Loader2 } from 'lucide-react';
 import { api } from '@/lib/api';
 import toast from 'react-hot-toast';
@@ -57,6 +58,7 @@ export default function PlayerDashboardPage() {
   const [data, setData]         = useState<DashboardData | null>(null);
   const [loading, setLoading]   = useState(true);
   const [sharing, setSharing]   = useState(false);
+  const [capturing, setCapturing] = useState(false);
   const mobileCardRef           = useRef<HTMLDivElement>(null);
   const desktopCardRef          = useRef<HTMLDivElement>(null);
 
@@ -96,6 +98,8 @@ export default function PlayerDashboardPage() {
     const ref = isMobile ? mobileCardRef : desktopCardRef;
     if (!ref.current) return;
 
+    // Hide camera/delete buttons synchronously before capture
+    flushSync(() => setCapturing(true));
     setSharing(true);
     try {
       const html2canvas = (await import('html2canvas')).default;
@@ -106,6 +110,19 @@ export default function PlayerDashboardPage() {
         useCORS: true,
         allowTaint: true,
         logging: false,
+        onclone: (_doc, element) => {
+          // html2canvas doesn't handle object-fit:cover reliably — replace
+          // the player photo <img> with a background-image on its parent
+          const photo = element.querySelector('[data-player-photo]') as HTMLImageElement | null;
+          if (photo?.parentElement) {
+            const parent = photo.parentElement as HTMLElement;
+            parent.style.backgroundImage = `url("${photo.src}")`;
+            parent.style.backgroundSize = 'cover';
+            parent.style.backgroundPosition = 'top center';
+            parent.style.backgroundRepeat = 'no-repeat';
+            photo.style.display = 'none';
+          }
+        },
       });
 
       // 9:16 Instagram story canvas
@@ -155,6 +172,7 @@ export default function PlayerDashboardPage() {
       if (e?.name !== 'AbortError') toast.error('Error al compartir la imagen');
     } finally {
       setSharing(false);
+      setCapturing(false);
     }
   };
 
@@ -181,7 +199,7 @@ export default function PlayerDashboardPage() {
         ) : data?.player ? (
           <>
             <div ref={mobileCardRef}>
-              <PlayerCredential player={data.player} onAvatarChange={handleAvatarFileChange} onAvatarDelete={handleAvatarDelete} paymentStatus={data.paymentStatus} season={data.season} />
+              <PlayerCredential player={data.player} onAvatarChange={handleAvatarFileChange} onAvatarDelete={handleAvatarDelete} capturing={capturing} paymentStatus={data.paymentStatus} season={data.season} />
             </div>
             <ShareStoryButton onClick={handleShareStory} loading={sharing} />
             <PaymentStatusBadge status={data.paymentStatus} fees={data.fees} />
@@ -219,7 +237,7 @@ export default function PlayerDashboardPage() {
           <div className="grid grid-cols-[320px_1fr] gap-4">
             <div className="space-y-3">
               <div ref={desktopCardRef}>
-                <PlayerCredential player={data.player} onAvatarChange={handleAvatarFileChange} onAvatarDelete={handleAvatarDelete} paymentStatus={data.paymentStatus} season={data.season} />
+                <PlayerCredential player={data.player} onAvatarChange={handleAvatarFileChange} onAvatarDelete={handleAvatarDelete} capturing={capturing} paymentStatus={data.paymentStatus} season={data.season} />
               </div>
               <ShareStoryButton onClick={handleShareStory} loading={sharing} />
               <PaymentStatusBadge status={data.paymentStatus} fees={data.fees} />

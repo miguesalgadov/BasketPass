@@ -27,6 +27,7 @@ interface Props {
   onAvatarDelete?: () => void;
   paymentStatus?: string;
   season?: { matchesPlayed: number; attendanceRate: number };
+  capturing?: boolean;
 }
 
 
@@ -36,7 +37,7 @@ const PAYMENT_LABEL: Record<string, { label: string; color: string }> = {
   DANGER:  { label: 'Vencido',   color: '#EF4444' },
 };
 
-export function PlayerCredential({ player, onAvatarChange, onAvatarDelete, paymentStatus = 'OK', season }: Props) {
+export function PlayerCredential({ player, onAvatarChange, onAvatarDelete, paymentStatus = 'OK', season, capturing = false }: Props) {
   const club   = player.club;
   const accent = club?.primaryColor ?? '#F97316';
   const year   = new Date().getFullYear();
@@ -107,13 +108,14 @@ export function PlayerCredential({ player, onAvatarChange, onAvatarDelete, payme
         {/* Right: player photo */}
         <div className="absolute top-0 right-0 bottom-0 w-[130px] overflow-hidden z-20">
           <img
+            data-player-photo
             src={avatarSrc ?? '/players/pezoa.jpg'}
             alt={player.firstName}
             className="w-full h-full object-cover object-top"
           />
           <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, #0D1525 0%, transparent 45%)' }} />
           <div className="absolute bottom-0 left-0 right-0 h-8" style={{ background: 'linear-gradient(to top, #1A2540 0%, transparent 100%)' }} />
-          {onAvatarChange && (
+          {onAvatarChange && !capturing && (
             <>
               {/* Hover overlay — input nested directly so iOS Safari allows the file picker */}
               <label className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center gap-1 opacity-0 hover:opacity-100 active:opacity-100 transition-opacity cursor-pointer">
@@ -138,7 +140,7 @@ export function PlayerCredential({ player, onAvatarChange, onAvatarDelete, payme
               </label>
             </>
           )}
-          {avatarSrc && onAvatarDelete && (
+          {avatarSrc && onAvatarDelete && !capturing && (
             <button
               type="button"
               onClick={onAvatarDelete}
@@ -167,9 +169,9 @@ export function PlayerCredential({ player, onAvatarChange, onAvatarDelete, payme
             <p className="text-xs font-bold text-white/80">31/12/{year}</p>
           </div>
           {/* Verified badge */}
-          <div className="flex items-center gap-1.5 bg-emerald-500/15 border border-emerald-500/30 rounded-full px-2.5 py-1 w-fit mt-1">
-            <ShieldCheck size={11} className="text-emerald-400" />
-            <span className="text-[9px] text-emerald-400 font-semibold tracking-wide">Carnet verificado</span>
+          <div className="flex items-center gap-1.5 bg-emerald-500/15 border border-emerald-500/30 rounded-full px-2.5 py-1 w-fit mt-1" style={{ display: 'flex', alignItems: 'center' }}>
+            <ShieldCheck size={11} className="text-emerald-400" style={{ flexShrink: 0 }} />
+            <span className="text-[9px] text-emerald-400 font-semibold tracking-wide" style={{ lineHeight: 1 }}>Carnet verificado</span>
           </div>
         </div>
         <div className="flex-shrink-0 flex items-center justify-center" style={{ width: 80, height: 80 }}>
@@ -193,9 +195,9 @@ export function PlayerCredential({ player, onAvatarChange, onAvatarDelete, payme
           </div>
           <div>
             <p className="text-[8px] text-white/35">Estado cuota</p>
-            <div className="flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: pm.color }} />
-              <p className="text-xs font-bold" style={{ color: pm.color }}>{pm.label}</p>
+            <div className="flex items-center gap-1" style={{ display: 'flex', alignItems: 'center' }}>
+              <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: pm.color, flexShrink: 0 }} />
+              <p className="text-xs font-bold" style={{ color: pm.color, lineHeight: 1 }}>{pm.label}</p>
             </div>
           </div>
           <div>
