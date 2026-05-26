@@ -110,7 +110,7 @@ function NominationModal({
           const nomRes = await api.get(`/nominations/${match.id}?teamId=${match.coachTeamId}`);
           const nom = nomRes.data.data;
           if (nom) {
-            if (nom.players?.length) setSelected(new Set(nom.players.map((p: RosterPlayer) => p.id)));
+            if (nom.players?.length) setSelected(new Set(nom.players.map((p: any) => p.playerId)));
             setNotes(nom.notes ?? '');
             setJerseyColor(nom.jerseyColor ?? '');
             setSockColor(nom.sockColor ?? '');
@@ -434,7 +434,7 @@ export default function NominationsPage() {
       ]);
       const nom = nomRes.data.data;
       const roster: RosterPlayer[] = rosterRes.data.data ?? rosterRes.data;
-      const players = roster.filter(p => nom?.players?.some((np: RosterPlayer) => np.id === p.id));
+      const players = roster.filter(p => nom?.players?.some((np: any) => np.playerId === p.id));
       const text = buildWhatsappText(match, players, nom?.notes ?? '', nom?.jerseyColor ?? '', nom?.sockColor ?? '');
       window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
       await api.post(`/nominations/${match.id}/whatsapp`, { teamId: match.coachTeamId });

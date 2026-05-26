@@ -42,7 +42,7 @@ export default function CoachDashboardPage() {
           api.get('/teams'),
           api.get('/matches'),
           api.get('/trainings'),
-          api.get('/players', { params: { limit: 1 } }),
+          api.get('/players'),
         ]);
 
         const now = new Date();
@@ -86,7 +86,7 @@ export default function CoachDashboardPage() {
           totalTeams: allTeams.length,
           weekTrainings,
           monthMatches,
-          totalPlayers: playersRes.data.meta?.total ?? 0,
+          totalPlayers: (playersRes.data.data ?? []).length,
         });
         setUpcoming(events);
       } catch {
