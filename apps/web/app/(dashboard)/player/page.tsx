@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { Download, Loader2 } from 'lucide-react';
 import { api } from '@/lib/api';
 import toast from 'react-hot-toast';
 import { PlayerCredential } from '@/components/modules/player/PlayerCredential';
@@ -38,9 +39,26 @@ function SkeletonCard({ h = 'h-40' }: { h?: string }) {
   return <div className={`${h} rounded-xl bg-white/5 animate-pulse`} />;
 }
 
+function ShareStoryButton({ onClick, loading }: { onClick: () => void; loading: boolean }) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={loading}
+      className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white/50 hover:text-white/80 text-sm font-medium transition disabled:opacity-40"
+    >
+      {loading
+        ? <><Loader2 size={15} className="animate-spin" /> Generando...</>
+        : <><Download size={15} /> Guardar como historia</>}
+    </button>
+  );
+}
+
 export default function PlayerDashboardPage() {
-  const [data, setData] = useState<DashboardData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [data, setData]         = useState<DashboardData | null>(null);
+  const [loading, setLoading]   = useState(true);
+  const [sharing, setSharing]   = useState(false);
+  const mobileCardRef           = useRef<HTMLDivElement>(null);
+  const desktopCardRef          = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     api.get('/players/me/dashboard')
@@ -73,13 +91,64 @@ export default function PlayerDashboardPage() {
     }
   };
 
+  const handleShareStory = async () => {
+    const isMobile = window.innerWidth < 1024;
+    const ref = isMobile ? mobileCardRef : desktopCardRef;
+    if (!ref.current) return;
+
+    setSharing(true);
+    try {
+      const html2canvas = (await import('html2canvas')).default;
+
+      const cardCanvas = await html2canvas(ref.current, {
+        backgroundColor: null,
+        scale: 3,
+        useCORS: true,
+        allowTaint: true,
+        logging: false,
+      });
+
+      // 9:16 Instagram story canvas
+      const story = document.createElement('canvas');
+      story.width  = 1080;
+      story.height = 1920;
+      const ctx = story.getContext('2d')!;
+
+      // Background gradient matching the app
+      const bg = ctx.createLinearGradient(0, 0, 0, 1920);
+      bg.addColorStop(0, '#0D1525');
+      bg.addColorStop(1, '#111827');
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, 1080, 1920);
+
+      // Scale card to fit with side margins
+      const margin  = 80;
+      const cardW   = story.width - margin * 2;
+      const scale   = cardW / cardCanvas.width;
+      const cardH   = cardCanvas.height * scale;
+      const x       = margin;
+      const y       = (story.height - cardH) / 2;
+
+      ctx.drawImage(cardCanvas, x, y, cardW, cardH);
+
+      const link    = document.createElement('a');
+      link.download = `carnet-${data?.player?.lastName?.toLowerCase() ?? 'jugador'}.png`;
+      link.href     = story.toDataURL('image/png');
+      link.click();
+      toast.success('Historia guardada — compartila desde tu galería');
+    } catch {
+      toast.error('Error al generar la imagen');
+    } finally {
+      setSharing(false);
+    }
+  };
+
   const accent = data?.player?.club?.primaryColor ?? '#F97316';
 
   return (
     <div className="min-h-screen bg-[#0F1117] -m-4 lg:-m-6 p-4 lg:p-6 pb-24 lg:pb-6">
       {/* ── MOBILE LAYOUT ── */}
       <div className="flex flex-col lg:hidden gap-3">
-        {/* Greeting */}
         <div className="pt-1">
           <p className="text-xs text-white/40 uppercase tracking-widest mb-0.5">Bienvenido</p>
           <h1 className="text-xl font-black text-white">
@@ -96,7 +165,10 @@ export default function PlayerDashboardPage() {
           </>
         ) : data?.player ? (
           <>
-            <PlayerCredential player={data.player} onAvatarChange={handleAvatarFileChange} onAvatarDelete={handleAvatarDelete} paymentStatus={data.paymentStatus} season={data.season} />
+            <div ref={mobileCardRef}>
+              <PlayerCredential player={data.player} onAvatarChange={handleAvatarFileChange} onAvatarDelete={handleAvatarDelete} paymentStatus={data.paymentStatus} season={data.season} />
+            </div>
+            <ShareStoryButton onClick={handleShareStory} loading={sharing} />
             <PaymentStatusBadge status={data.paymentStatus} fees={data.fees} />
             <UpcomingActivities events={data.upcomingEvents} />
             <SeasonSummaryBar stats={data.season} />
@@ -131,7 +203,10 @@ export default function PlayerDashboardPage() {
         ) : data?.player ? (
           <div className="grid grid-cols-[320px_1fr] gap-4">
             <div className="space-y-3">
-              <PlayerCredential player={data.player} onAvatarChange={handleAvatarFileChange} onAvatarDelete={handleAvatarDelete} paymentStatus={data.paymentStatus} season={data.season} />
+              <div ref={desktopCardRef}>
+                <PlayerCredential player={data.player} onAvatarChange={handleAvatarFileChange} onAvatarDelete={handleAvatarDelete} paymentStatus={data.paymentStatus} season={data.season} />
+              </div>
+              <ShareStoryButton onClick={handleShareStory} loading={sharing} />
               <PaymentStatusBadge status={data.paymentStatus} fees={data.fees} />
             </div>
             <div className="space-y-3">
@@ -145,7 +220,6 @@ export default function PlayerDashboardPage() {
           <div className="text-white/40 text-sm text-center py-12">Error al cargar el perfil</div>
         )}
       </div>
-
     </div>
   );
 }
