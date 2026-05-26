@@ -32,7 +32,10 @@ export async function GET(req: NextRequest) {
     orderBy: [{ team: { name: 'asc' } }, { user: { lastName: 'asc' } }],
   });
 
-  return ok(players);
+  return ok(players.map((p) => ({
+    ...p,
+    team: p.team ? { ...p.team, category: p.team.category === 'Mayores' ? 'Senior' : p.team.category } : p.team,
+  })));
 }
 
 export async function POST(req: NextRequest) {

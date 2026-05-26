@@ -53,7 +53,7 @@ function Field({ label, error, children }: { label: string; error?: string; chil
 const inputClass = 'w-full px-3 py-2 border border-border rounded-lg bg-surface text-secondary text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary transition';
 
 const CATEGORIES = [
-  'Mini', 'Infantil', 'Cadete', 'Junior', 'U18', 'U20', 'Mayores', 'Senior',
+  'Mini', 'Infantil', 'Cadete', 'Junior', 'U18', 'U20', 'Senior',
 ];
 
 export function TeamModal({ open, onClose, onSuccess, team }: TeamModalProps) {

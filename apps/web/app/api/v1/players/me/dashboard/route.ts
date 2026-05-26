@@ -106,7 +106,7 @@ export async function GET(req: NextRequest) {
       position:         player.position       ?? null,
       height:           player.height         ?? null,
       weight:           player.weight         ?? null,
-      team:             player.team           ?? null,
+      team:             player.team ? { ...player.team, category: player.team.category === 'Mayores' ? 'Senior' : player.team.category } : null,
       club:             player.user.club      ?? null,
       seasonAvgPoints:   avg((s) => s.points),
       seasonAvgRebounds: avg((s) => s.rebounds),

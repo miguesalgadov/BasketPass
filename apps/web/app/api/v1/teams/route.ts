@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
     take: limit,
     orderBy: { name: 'asc' },
   });
-  return ok(teams);
+  return ok(teams.map((t) => ({ ...t, category: t.category === 'Mayores' ? 'Senior' : t.category })));
 }
 
 export async function POST(req: NextRequest) {

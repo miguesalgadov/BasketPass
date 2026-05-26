@@ -14,7 +14,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     },
   });
   if (!team) return err('Team not found', 'NOT_FOUND', 404);
-  return ok(team);
+  return ok({ ...team, category: team.category === 'Mayores' ? 'Senior' : team.category });
 }
 
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
