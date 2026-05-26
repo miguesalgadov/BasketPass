@@ -2,6 +2,13 @@ import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getAuthUser, unauthorized, ok, err } from '@/lib/auth-server';
 
+export async function DELETE(req: NextRequest) {
+  const auth = getAuthUser(req);
+  if (!auth) return unauthorized();
+  await prisma.user.update({ where: { id: auth.id }, data: { avatarUrl: null } });
+  return ok({ avatarUrl: null });
+}
+
 export async function POST(req: NextRequest) {
   const auth = getAuthUser(req);
   if (!auth) return unauthorized();

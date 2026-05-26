@@ -63,6 +63,16 @@ export default function PlayerDashboardPage() {
     }
   };
 
+  const handleAvatarDelete = async () => {
+    try {
+      await api.delete('/players/me/avatar');
+      setData((prev) => prev ? { ...prev, player: { ...prev.player!, photoUrl: null } } : prev);
+      toast.success('Foto eliminada');
+    } catch {
+      toast.error('Error al eliminar la foto');
+    }
+  };
+
   const accent = data?.player?.club?.primaryColor ?? '#F97316';
 
   return (
@@ -86,7 +96,7 @@ export default function PlayerDashboardPage() {
           </>
         ) : data?.player ? (
           <>
-            <PlayerCredential player={data.player} onAvatarChange={handleAvatarFileChange} paymentStatus={data.paymentStatus} season={data.season} />
+            <PlayerCredential player={data.player} onAvatarChange={handleAvatarFileChange} onAvatarDelete={handleAvatarDelete} paymentStatus={data.paymentStatus} season={data.season} />
             <PaymentStatusBadge status={data.paymentStatus} fees={data.fees} />
             <UpcomingActivities events={data.upcomingEvents} />
             <SeasonSummaryBar stats={data.season} />
@@ -121,7 +131,7 @@ export default function PlayerDashboardPage() {
         ) : data?.player ? (
           <div className="grid grid-cols-[320px_1fr] gap-4">
             <div className="space-y-3">
-              <PlayerCredential player={data.player} onAvatarChange={handleAvatarFileChange} paymentStatus={data.paymentStatus} season={data.season} />
+              <PlayerCredential player={data.player} onAvatarChange={handleAvatarFileChange} onAvatarDelete={handleAvatarDelete} paymentStatus={data.paymentStatus} season={data.season} />
               <PaymentStatusBadge status={data.paymentStatus} fees={data.fees} />
             </div>
             <div className="space-y-3">

@@ -1,6 +1,6 @@
 'use client';
 
-import { Camera, ShieldCheck } from 'lucide-react';
+import { Camera, ShieldCheck, Trash2 } from 'lucide-react';
 
 interface Club  { name: string; primaryColor?: string | null; slug?: string | null }
 interface Team  { name: string; category: string }
@@ -24,6 +24,7 @@ interface PlayerData {
 interface Props {
   player: PlayerData;
   onAvatarChange?: (file: File) => void;
+  onAvatarDelete?: () => void;
   paymentStatus?: string;
   season?: { matchesPlayed: number; attendanceRate: number };
 }
@@ -75,7 +76,7 @@ const PAYMENT_LABEL: Record<string, { label: string; color: string }> = {
   DANGER:  { label: 'Vencido',   color: '#EF4444' },
 };
 
-export function PlayerCredential({ player, onAvatarChange, paymentStatus = 'OK', season }: Props) {
+export function PlayerCredential({ player, onAvatarChange, onAvatarDelete, paymentStatus = 'OK', season }: Props) {
   const club   = player.club;
   const accent = club?.primaryColor ?? '#F97316';
   const year   = new Date().getFullYear();
@@ -89,20 +90,6 @@ export function PlayerCredential({ player, onAvatarChange, paymentStatus = 'OK',
     : null;
 
   return (
-    <>
-    {onAvatarChange && (
-      <input
-        id="player-avatar-input"
-        type="file"
-        accept="image/*"
-        style={{ position: 'fixed', opacity: 0, width: 1, height: 1, top: 0, left: 0, zIndex: -1 }}
-        onChange={(e) => {
-          const file = e.target.files?.[0];
-          if (file) onAvatarChange(file);
-          e.target.value = '';
-        }}
-      />
-    )}
     <div
       className="rounded-2xl overflow-hidden shadow-2xl w-full select-none"
       style={{ background: 'linear-gradient(160deg, #0D1525 0%, #1A2540 100%)' }}
@@ -168,22 +155,37 @@ export function PlayerCredential({ player, onAvatarChange, paymentStatus = 'OK',
           <div className="absolute bottom-0 left-0 right-0 h-8" style={{ background: 'linear-gradient(to top, #1A2540 0%, transparent 100%)' }} />
           {onAvatarChange && (
             <>
-              {/* Hover overlay */}
-              <label
-                htmlFor="player-avatar-input"
-                className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center gap-1 opacity-0 hover:opacity-100 active:opacity-100 transition-opacity cursor-pointer"
-              >
-                <Camera size={20} className="text-white" />
-                <span className="text-[9px] text-white font-medium">Cambiar</span>
+              {/* Hover overlay — input nested directly so iOS Safari allows the file picker */}
+              <label className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center gap-1 opacity-0 hover:opacity-100 active:opacity-100 transition-opacity cursor-pointer">
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                  onChange={(e) => { const file = e.target.files?.[0]; if (file) onAvatarChange(file); e.target.value = ''; }}
+                />
+                <Camera size={20} className="text-white pointer-events-none" />
+                <span className="text-[9px] text-white font-medium pointer-events-none">Cambiar</span>
               </label>
-              {/* Always-visible badge */}
-              <label
-                htmlFor="player-avatar-input"
-                className="absolute bottom-2 right-2 w-7 h-7 rounded-full bg-primary flex items-center justify-center shadow-lg cursor-pointer"
-              >
-                <Camera size={13} className="text-white" />
+              {/* Camera badge — always visible, input nested so label tap opens file picker */}
+              <label className="absolute bottom-2 right-2 w-7 h-7 rounded-full bg-primary flex items-center justify-center shadow-lg cursor-pointer overflow-hidden">
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                  onChange={(e) => { const file = e.target.files?.[0]; if (file) onAvatarChange(file); e.target.value = ''; }}
+                />
+                <Camera size={13} className="text-white pointer-events-none" />
               </label>
             </>
+          )}
+          {avatarSrc && onAvatarDelete && (
+            <button
+              type="button"
+              onClick={onAvatarDelete}
+              className="absolute bottom-2 right-11 w-7 h-7 rounded-full bg-red-500 flex items-center justify-center shadow-lg"
+            >
+              <Trash2 size={13} className="text-white" />
+            </button>
           )}
         </div>
       </div>
@@ -240,6 +242,5 @@ export function PlayerCredential({ player, onAvatarChange, paymentStatus = 'OK',
         </div>
       </div>
     </div>
-    </>
   );
 }
