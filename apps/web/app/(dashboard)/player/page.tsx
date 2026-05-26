@@ -111,8 +111,7 @@ export default function PlayerDashboardPage() {
         allowTaint: true,
         logging: false,
         onclone: (_doc, element) => {
-          // html2canvas doesn't handle object-fit:cover reliably — replace
-          // the player photo <img> with a background-image on its parent
+          // Fix 1: player photo — html2canvas doesn't handle object-fit:cover
           const photo = element.querySelector('[data-player-photo]') as HTMLImageElement | null;
           if (photo?.parentElement) {
             const parent = photo.parentElement as HTMLElement;
@@ -122,7 +121,7 @@ export default function PlayerDashboardPage() {
             parent.style.backgroundRepeat = 'no-repeat';
             photo.style.display = 'none';
           }
-          // Club logo: ensure object-fit:contain is applied on parent background fallback
+          // Fix 2: club logo
           const clubLogo = element.querySelector('[data-club-logo]') as HTMLImageElement | null;
           if (clubLogo?.parentElement) {
             const parent = clubLogo.parentElement as HTMLElement;
@@ -132,6 +131,18 @@ export default function PlayerDashboardPage() {
             parent.style.backgroundRepeat = 'no-repeat';
             clubLogo.style.display = 'none';
           }
+          // Fix 3: resolve currentColor in Lucide SVG icons — html2canvas doesn't
+          // propagate the CSS `color` property into SVG stroke/fill attributes.
+          // Only SVGs with an explicit inline style.color (i.e. Lucide icons) are patched;
+          // our custom header/footer SVGs have no style.color and are left untouched.
+          element.querySelectorAll('svg').forEach((svg) => {
+            const color = (svg as HTMLElement).style.color;
+            if (!color) return;
+            svg.querySelectorAll('[stroke="currentColor"]').forEach((el) => el.setAttribute('stroke', color));
+            svg.querySelectorAll('[fill="currentColor"]').forEach((el) => el.setAttribute('fill', color));
+            if (svg.getAttribute('stroke') === 'currentColor') svg.setAttribute('stroke', color);
+            if (svg.getAttribute('fill')   === 'currentColor') svg.setAttribute('fill',   color);
+          });
         },
       });
 
