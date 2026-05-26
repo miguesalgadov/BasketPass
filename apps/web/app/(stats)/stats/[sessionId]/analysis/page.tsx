@@ -181,7 +181,7 @@ export default function AnalysisPage() {
                 <div className="text-4xl mb-4">✦</div>
                 <p className="text-white font-medium mb-1">Análisis IA no generado</p>
                 <p className="text-xs text-[#7A8098] mb-6">
-                  El análisis se genera automáticamente al finalizar el partido, o podés generarlo ahora.
+                  El análisis se genera automáticamente al finalizar el partido, o puedes generarlo ahora.
                 </p>
                 <button
                   onClick={handleGenerate}
@@ -204,7 +204,7 @@ export default function AnalysisPage() {
                 <p className="text-sm text-white/90 leading-relaxed">{data.recap}</p>
                 {data.generatedAt && (
                   <p className="text-[10px] text-[#7A8098] mt-3">
-                    Generado el {new Date(data.generatedAt).toLocaleString('es-AR')}
+                    Generado el {new Date(data.generatedAt).toLocaleString('es-CL')}
                   </p>
                 )}
               </div>

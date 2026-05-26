@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
@@ -23,9 +23,9 @@ function formatDate(iso: string | null): string {
   const today = new Date();
   const isToday = d.toDateString() === today.toDateString();
   if (isToday) {
-    return `Hoy ${d.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}`;
+    return `Hoy ${d.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' })}`;
   }
-  return d.toLocaleDateString('es-AR', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+  return d.toLocaleDateString('es-CL', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
 }
 
 function statusBadge(status: string) {

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState, useCallback } from 'react';
 import { Plus, ExternalLink, Trash2, FileText, Search } from 'lucide-react';
@@ -193,7 +193,7 @@ export default function DocumentsPage() {
                   <td className="px-4 py-3">
                     <p className="font-medium text-secondary">{doc.title}</p>
                     <p className="text-xs text-muted-foreground">
-                      {new Date(doc.uploadedAt).toLocaleDateString('es-AR')}
+                      {new Date(doc.uploadedAt).toLocaleDateString('es-CL')}
                     </p>
                   </td>
                   <td className="px-4 py-3">
@@ -210,7 +210,7 @@ export default function DocumentsPage() {
                         isExpired(doc.expiresAt) ? 'text-danger' : isExpiringSoon(doc.expiresAt) ? 'text-warning' : 'text-muted-foreground'
                       )}>
                         {isExpired(doc.expiresAt) ? '⚠ Vencido · ' : isExpiringSoon(doc.expiresAt) ? '⏰ Vence · ' : ''}
-                        {new Date(doc.expiresAt).toLocaleDateString('es-AR')}
+                        {new Date(doc.expiresAt).toLocaleDateString('es-CL')}
                       </span>
                     ) : <span className="text-muted-foreground text-xs">—</span>}
                   </td>

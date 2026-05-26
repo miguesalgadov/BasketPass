@@ -142,7 +142,7 @@ export default function PlayersPage() {
           <DialogHeader>
             <DialogTitle>Desactivar jugador</DialogTitle>
             <DialogDescription>
-              ¿Confirmás que querés desactivar a{' '}
+              ¿Confirmas que quieres desactivar a{' '}
               <strong className="text-secondary">
                 {deactivateTarget?.user.firstName} {deactivateTarget?.user.lastName}
               </strong>

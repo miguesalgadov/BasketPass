@@ -161,7 +161,7 @@ export default function TeamsPage() {
           <DialogHeader>
             <DialogTitle>Eliminar equipo</DialogTitle>
             <DialogDescription>
-              ¿Confirmás que querés eliminar el equipo{' '}
+              ¿Confirmas que quieres eliminar el equipo{' '}
               <strong className="text-secondary">"{deleteTarget?.name}"</strong>?
               Esta acción desactivará el equipo y no podrá ser recuperado.
             </DialogDescription>

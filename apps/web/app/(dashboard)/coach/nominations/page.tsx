@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import { useEffect, useState, useCallback } from 'react';
 import { api } from '@/lib/api';
 import { cn } from '@/lib/utils';
@@ -40,7 +40,7 @@ const MAX = 12;
 
 function formatDate(iso: string | null): string {
   if (!iso) return 'Sin fecha';
-  return new Date(iso).toLocaleDateString('es-AR', {
+  return new Date(iso).toLocaleDateString('es-CL', {
     weekday: 'long', day: 'numeric', month: 'long',
     hour: '2-digit', minute: '2-digit',
   });
@@ -59,7 +59,7 @@ function buildWhatsappText(
   sockColor?: string,
 ): string {
   const date = match.scheduledAt
-    ? new Date(match.scheduledAt).toLocaleDateString('es-AR', {
+    ? new Date(match.scheduledAt).toLocaleDateString('es-CL', {
         weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit',
       })
     : 'Por confirmar';
@@ -340,7 +340,7 @@ function MatchCard({ match, onEdit, onSendWhatsapp }: { match: UpcomingMatch; on
               days <= 1 ? 'text-red-500' : days <= 2 ? 'text-orange-500' : 'text-muted-foreground'
             )}>
               {days <= 0 ? 'Hoy' : days === 1 ? 'Mañana' : `En ${days} días`}
-              {match.scheduledAt && ` · ${new Date(match.scheduledAt).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}`}
+              {match.scheduledAt && ` · ${new Date(match.scheduledAt).toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' })}`}
             </span>
           </div>
           {match.venue && <p className="text-[11px] text-muted-foreground mt-0.5">{match.venue}</p>}

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState, useCallback } from 'react';
 import { CheckCircle, XCircle, Clock, AlertCircle, ChevronDown, Save } from 'lucide-react';
@@ -40,8 +40,8 @@ const STATUS_COLOR: Record<AttendanceStatus, string> = {
 
 function formatSessionDate(iso: string) {
   const d = new Date(iso);
-  return d.toLocaleDateString('es-AR', { weekday: 'short', day: 'numeric', month: 'short' }) +
-    ' · ' + d.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+  return d.toLocaleDateString('es-CL', { weekday: 'short', day: 'numeric', month: 'short' }) +
+    ' · ' + d.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
 }
 
 export default function AttendancePage() {

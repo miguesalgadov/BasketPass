@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState } from 'react';
 import { Users, Trophy, DollarSign, Calendar, ClipboardCheck, AlertCircle, MapPin, Clock, Home, Plane } from 'lucide-react';
@@ -42,8 +42,8 @@ interface Stats {
 }
 
 function formatEventDate(d: Date) {
-  return d.toLocaleDateString('es-AR', { weekday: 'short', day: 'numeric', month: 'short' })
-    + ' · ' + d.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+  return d.toLocaleDateString('es-CL', { weekday: 'short', day: 'numeric', month: 'short' })
+    + ' · ' + d.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
 }
 
 export default function AdminDashboardPage() {

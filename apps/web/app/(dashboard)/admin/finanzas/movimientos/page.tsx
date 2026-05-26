@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState, useCallback } from 'react';
 import {
@@ -227,7 +227,7 @@ export default function MovimientosPage() {
                   {data.transactions.map(t => (
                     <tr key={t.id} className="hover:bg-muted/20 transition">
                       <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">
-                        {new Date(t.date).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit' })}
+                        {new Date(t.date).toLocaleDateString('es-CL', { day: '2-digit', month: '2-digit' })}
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">

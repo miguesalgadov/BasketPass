@@ -162,7 +162,7 @@ export function CalendarSyncDialog({ open, onClose, teams = [] }: Props) {
             <div className="bg-muted/50 rounded-lg p-3 text-xs text-muted-foreground space-y-1 border border-border">
               <p className="font-medium text-secondary">¿Cómo agregar a Google Calendar?</p>
               <ol className="list-decimal list-inside space-y-0.5">
-                <li>Hacé clic en <strong>Abrir en Google Calendar</strong></li>
+                <li>Haz clic en <strong>Abrir en Google Calendar</strong></li>
                 <li>Google te pedirá confirmar — hacé clic en <strong>Agregar calendario</strong></li>
                 <li>Los eventos se actualizan automáticamente</li>
               </ol>

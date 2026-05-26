@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -160,7 +160,7 @@ export default function PlayerStatsPage() {
                     <td className="px-4 py-3">
                       <p className="font-medium text-secondary">vs. {g.match.opponent}</p>
                       <p className="text-xs text-muted-foreground">
-                        {new Date(g.match.date).toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric' })}
+                        {new Date(g.match.date).toLocaleDateString('es-CL', { day: '2-digit', month: 'short', year: 'numeric' })}
                       </p>
                     </td>
                     {[g.points, g.rebounds, g.assists, g.steals, g.blocks, g.turnovers, g.fouls, g.freeThrowsMade, g.freeThrowsAttempted].map((v, i) => (

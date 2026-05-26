@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState, useCallback } from 'react';
 import { Save, ChevronDown } from 'lucide-react';
@@ -163,7 +163,7 @@ export default function CoachStatsPage() {
                   ? <option value="">Sin partidos finalizados</option>
                   : matches.map((m) => (
                     <option key={m.id} value={m.id}>
-                      🏀 {m.team?.name} vs. {m.opponent} — {new Date(m.date).toLocaleDateString('es-AR')}
+                      🏀 {m.team?.name} vs. {m.opponent} — {new Date(m.date).toLocaleDateString('es-CL')}
                     </option>
                   ))
                 }

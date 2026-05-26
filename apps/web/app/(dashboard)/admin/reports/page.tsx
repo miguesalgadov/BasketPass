@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState, useMemo } from 'react';
 import { Download } from 'lucide-react';
@@ -92,7 +92,7 @@ export default function ReportsPage() {
     for (const p of payments) {
       const d = new Date(p.createdAt);
       const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-      const label = d.toLocaleDateString('es-AR', { month: 'long', year: 'numeric' });
+      const label = d.toLocaleDateString('es-CL', { month: 'long', year: 'numeric' });
       if (!map.has(key)) map.set(key, { month: label, billed: 0, collected: 0, pending: 0, overdue: 0, count: 0 });
       const b = map.get(key)!;
       b.count++;

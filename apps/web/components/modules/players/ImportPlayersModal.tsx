@@ -416,7 +416,7 @@ export function ImportPlayersModal({ open, teams, onClose, onDone }: Props) {
               <p className="text-sm font-semibold text-primary">{fileName}</p>
             ) : (
               <>
-                <p className="text-sm font-medium text-secondary">Arrastrá el archivo aquí o hacé clic para seleccionar</p>
+                <p className="text-sm font-medium text-secondary">Arrastra el archivo aquí o haz clic para seleccionar</p>
                 <p className="text-xs text-muted-foreground mt-1">Solo archivos Excel (.xlsx · .xls)</p>
               </>
             )}

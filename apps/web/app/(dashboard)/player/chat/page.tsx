@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { Send, MessageSquare } from 'lucide-react';
@@ -25,9 +25,9 @@ function timeLabel(iso: string) {
   const d = new Date(iso);
   const now = new Date();
   if (d.toDateString() === now.toDateString()) {
-    return d.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+    return d.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
   }
-  return d.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit' });
+  return d.toLocaleDateString('es-CL', { day: '2-digit', month: '2-digit' });
 }
 
 export default function PlayerChatPage() {

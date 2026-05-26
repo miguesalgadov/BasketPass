@@ -25,33 +25,33 @@ const CONFIG: Record<PaymentStatusLevel, {
       const last = fees.find((f) => f.status === 'PAID');
       if (!last) return 'Sin deuda pendiente';
       const fmt = last.paidAmount ?? last.amount;
-      return `Último pago: ${MONTHS[last.month - 1]} ${last.year} · $${fmt.toLocaleString('es-AR')}`;
+      return `Último pago: ${MONTHS[last.month - 1]} ${last.year} · $${fmt.toLocaleString('es-CL')}`;
     },
   },
   WARNING: {
     container:  'bg-amber-500/10 border-amber-500/25',
     dot:        'bg-amber-400 ring-4 ring-amber-400/20',
-    title:      'Tenés una cuota atrasada',
+    title:      'Tienes una cuota atrasada',
     titleColor: 'text-amber-400',
     cta:        'Pagar ahora',
     ctaClass:   'bg-amber-500/15 text-amber-400 hover:bg-amber-500/25',
     subtitle: (fees) => {
       const overdue = fees.filter((f) => f.status === 'OVERDUE');
       const total = overdue.reduce((a, f) => a + f.amount, 0);
-      return `${overdue.length} cuota pendiente · Total: $${total.toLocaleString('es-AR')}`;
+      return `${overdue.length} cuota pendiente · Total: $${total.toLocaleString('es-CL')}`;
     },
   },
   DANGER: {
     container:  'bg-red-500/10 border-red-500/25',
     dot:        'bg-red-500 ring-4 ring-red-500/20 animate-pulse',
-    title:      '¡Deuda acumulada — regularizá tu situación!',
+    title:      '¡Deuda acumulada — regulariza tu situación!',
     titleColor: 'text-red-400',
     cta:        'Regularizar',
     ctaClass:   'bg-red-500/15 text-red-400 hover:bg-red-500/25',
     subtitle: (fees) => {
       const overdue = fees.filter((f) => f.status === 'OVERDUE');
       const total = overdue.reduce((a, f) => a + f.amount, 0);
-      return `${overdue.length} cuotas sin pagar · Total: $${total.toLocaleString('es-AR')}`;
+      return `${overdue.length} cuotas sin pagar · Total: $${total.toLocaleString('es-CL')}`;
     },
   },
 };

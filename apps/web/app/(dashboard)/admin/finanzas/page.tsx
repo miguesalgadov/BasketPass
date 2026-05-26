@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState, useCallback } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
@@ -314,7 +314,7 @@ export default function FinanzasDashboardPage() {
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-secondary truncate">{t.concept}</p>
                   <p className="text-xs text-muted-foreground">
-                    {new Date(t.date).toLocaleDateString('es-AR', { day: 'numeric', month: 'short' })}
+                    {new Date(t.date).toLocaleDateString('es-CL', { day: 'numeric', month: 'short' })}
                     {t.evidenceCount > 0 && ` · 📎 ${t.evidenceCount}`}
                   </p>
                 </div>

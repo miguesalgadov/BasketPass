@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import {
@@ -27,7 +27,7 @@ function toLocalDateKey(date: Date) {
 }
 
 function formatTime(d: Date) {
-  return d.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+  return d.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
 }
 
 // Returns the Monday of the week containing `date`
@@ -161,7 +161,7 @@ export default function CalendarPage() {
   const nextMonth = () => { if (month === 11) { setYear(y => y + 1); setMonth(0); } else setMonth(m => m + 1); };
 
   const monthLabel = new Date(year, month, 1)
-    .toLocaleDateString('es-AR', { month: 'long', year: 'numeric' })
+    .toLocaleDateString('es-CL', { month: 'long', year: 'numeric' })
     .replace(/^\w/, (c) => c.toUpperCase());
 
   const handleDelete = async (mode: 'single' | 'forward' | 'all') => {
@@ -369,7 +369,7 @@ export default function CalendarPage() {
                   {new Date(detail.type === 'match'
                     ? (detail.data as Match).date
                     : (detail.data as Training).date
-                  ).toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+                  ).toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
                   {' · '}
                   {formatTime(new Date(detail.type === 'match'
                     ? (detail.data as Match).date
@@ -436,7 +436,7 @@ export default function CalendarPage() {
               ))}
             </div>
           ) : (
-            <p className="px-6 pb-2 text-sm text-muted-foreground">¿Confirmás que querés eliminarlo?</p>
+            <p className="px-6 pb-2 text-sm text-muted-foreground">¿Confirmas que quieres eliminarlo?</p>
           )}
 
           <DialogFooter className="px-6 pb-4">

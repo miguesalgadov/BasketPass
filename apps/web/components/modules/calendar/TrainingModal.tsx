@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -310,7 +310,7 @@ function RecurrencePreview({ daysOfWeek, endDate }: { daysOfWeek: number[]; endD
   return (
     <p className="text-xs text-success font-medium">
       ✓ Se generarán <strong>{count}</strong> sesión{count !== 1 ? 'es' : ''} hasta el{' '}
-      {new Date(endDate).toLocaleDateString('es-AR', { day: '2-digit', month: 'long', year: 'numeric' })}
+      {new Date(endDate).toLocaleDateString('es-CL', { day: '2-digit', month: 'long', year: 'numeric' })}
     </p>
   );
 }

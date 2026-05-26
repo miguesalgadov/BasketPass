@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import Link from 'next/link';
 
@@ -20,7 +20,7 @@ const MONTHS_SHORT = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct
 
 function fmt(iso: string) {
   const d = new Date(iso);
-  return d.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+  return d.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
 }
 
 export function UpcomingActivities({ events }: { events: ActivityEvent[] }) {

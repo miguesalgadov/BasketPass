@@ -2,5 +2,13 @@
   "installCommand": "npm install",
   "buildCommand": "npm run build --workspace=apps/web",
   "outputDirectory": "apps/web/.next",
-  "framework": "nextjs"
+  "framework": "nextjs",
+  "experimentalServices": {
+    "api": {
+      "root": "apps/api",
+      "entrypoint": "src/index.ts",
+      "routePrefix": "/",
+      "buildCommand": "npm install && npx prisma generate && npm run build"
+    }
+  }
 }
