@@ -5,5 +5,11 @@
   "framework": "nextjs",
   "env": {
     "NEXT_PUBLIC_API_URL": "/api/v1"
-  }
+  },
+  "crons": [
+    {
+      "path": "/api/v1/cron/notifications",
+      "schedule": "0 * * * *"
+    }
+  ]
 }

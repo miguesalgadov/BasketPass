@@ -66,6 +66,7 @@ model User {
   nominations          MatchNomination[]     @relation("CoachNominations")
   createdTransactions  CashTransaction[]     @relation("TransactionCreator")
   uploadedEvidences    TransactionEvidence[] @relation("EvidenceUploader")
+  awardedAchievements  PlayerAchievement[]   @relation("CoachAwards")
 
   @@unique([clubId, email])
 }
@@ -116,6 +117,8 @@ model Player {
   documents    Document[]
   fees         Fee[]
   champStats   ChampPlayerStat[]
+  achievements      PlayerAchievement[]
+  achievementEvents AchievementEvent[]
   matchLineups       MatchLineup[]           @relation("PlayerMatchLineups")
   matchStats         MatchPlayerStat[]       @relation("PlayerMatchStats")
   nominationPlayers  MatchNominationPlayer[]
@@ -886,6 +889,101 @@ model CashCategory {
   isActive  Boolean @default(true)
 
   club Club @relation(fields: [clubId], references: [id])
+}
+
+// ── Insignias y Reconocimientos ──────────────────────────────────────────────
+
+enum AchievementCategory {
+  IDENTITY
+  ATTENDANCE
+  OFFENSE
+  DEFENSE
+  TEAMPLAY
+  PARTICIPATION
+  COACH
+  SEASON
+}
+
+enum AchievementTriggerType {
+  AUTOMATIC
+  MANUAL
+}
+
+enum AchievementRarity {
+  COMMON
+  RARE
+  EPIC
+  LEGENDARY
+}
+
+enum PlayerAchievementStatus {
+  LOCKED
+  IN_PROGRESS
+  UNLOCKED
+}
+
+enum AchievementEventType {
+  UNLOCKED
+  PROGRESS
+  COACH_AWARDED
+}
+
+model Achievement {
+  id          String                @id @default(cuid())
+  name        String                @unique
+  description String
+  category    AchievementCategory
+  icon        String
+  triggerType AchievementTriggerType
+  metric      String?
+  threshold   Int?
+  points      Int                   @default(10)
+  rarity      AchievementRarity     @default(COMMON)
+  isActive    Boolean               @default(true)
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+
+  players     PlayerAchievement[]
+  events      AchievementEvent[]
+
+  @@index([category, isActive])
+}
+
+model PlayerAchievement {
+  id               String                  @id @default(cuid())
+  playerId         String
+  achievementId    String
+  status           PlayerAchievementStatus @default(LOCKED)
+  progress         Int                     @default(0)
+  target           Int                     @default(1)
+  unlockedAt       DateTime?
+  awardedByCoachId String?
+  coachComment     String?
+  season           String?
+  createdAt        DateTime                @default(now())
+  updatedAt        DateTime                @updatedAt
+
+  player         Player      @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  achievement    Achievement @relation(fields: [achievementId], references: [id], onDelete: Restrict)
+  awardedByCoach User?       @relation("CoachAwards", fields: [awardedByCoachId], references: [id])
+
+  @@unique([playerId, achievementId])
+  @@index([playerId, status])
+}
+
+model AchievementEvent {
+  id            String               @id @default(cuid())
+  playerId      String
+  achievementId String
+  type          AchievementEventType
+  message       String
+  createdAt     DateTime             @default(now())
+  readAt        DateTime?
+
+  player      Player      @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  achievement Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+
+  @@index([playerId, readAt])
 }
 
 model MonthlySnapshot {

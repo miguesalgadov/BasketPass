@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getAuthUser, unauthorized, ok, err } from '@/lib/auth-server';
+import { evaluatePlayerAchievements } from '@/lib/achievements/evaluator';
 
 export async function POST(req: NextRequest) {
   const auth = getAuthUser(req);
@@ -25,6 +26,13 @@ export async function POST(req: NextRequest) {
         })
       )
     );
+
+    // Fire-and-forget achievement evaluation for present players
+    const presentIds = (attendances as { playerId: string; status: string }[])
+      .filter((a) => a.status === 'PRESENT')
+      .map((a) => a.playerId);
+    void Promise.allSettled(presentIds.map((id) => evaluatePlayerAchievements(id)));
+
     return ok(records);
   } catch (e: any) {
     return err(e.message, 'ATTENDANCE_ERROR', 400);

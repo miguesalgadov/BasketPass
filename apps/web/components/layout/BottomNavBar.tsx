@@ -2,15 +2,15 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutGrid, Calendar, BarChart2, CreditCard, MessageCircle } from 'lucide-react';
+import { LayoutGrid, Calendar, Award, CreditCard, MessageCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const NAV_ITEMS = [
-  { id: 'home',      icon: LayoutGrid,      label: 'Inicio',      href: '/player' },
-  { id: 'calendar', icon: Calendar,         label: 'Calendario',  href: '/player/calendar' },
-  { id: 'stats',    icon: BarChart2,        label: 'Stats',       href: '/player/stats' },
-  { id: 'payments', icon: CreditCard,       label: 'Pagos',       href: '/player/payments' },
-  { id: 'chat',     icon: MessageCircle,    label: 'Chat',        href: '/player/chat' },
+  { id: 'home',      icon: LayoutGrid,   label: 'Inicio',     href: '/player' },
+  { id: 'calendar', icon: Calendar,      label: 'Calendario', href: '/player/calendar' },
+  { id: 'logros',   icon: Award,         label: 'Logros',     href: '/player/logros' },
+  { id: 'payments', icon: CreditCard,    label: 'Pagos',      href: '/player/payments' },
+  { id: 'chat',     icon: MessageCircle, label: 'Chat',       href: '/player/chat' },
 ];
 
 export function BottomNavBar() {

@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard, Users, Trophy, Calendar, ClipboardCheck,
   BarChart2, DollarSign, FileText, Settings, LogOut, Dumbbell,
-  MessageCircle, Medal, ClipboardList, Wallet,
+  MessageCircle, Medal, ClipboardList, Wallet, Award,
 } from 'lucide-react';
 import { useAuthStore } from '@/store/auth.store';
 import { cn } from '@/lib/utils';
@@ -20,6 +20,7 @@ const NAV_ITEMS: Record<string, { href: string; label: string; icon: React.React
     { href: '/admin/finanzas', label: 'Finanzas', icon: <Wallet size={18} /> },
     { href: '/campeonatos', label: 'Campeonatos', icon: <Medal size={18} /> },
     { href: '/admin/reports', label: 'Reportes', icon: <BarChart2 size={18} /> },
+    { href: '/admin/insignias', label: 'Insignias', icon: <Award size={18} /> },
     { href: '/admin/documents', label: 'Documentos', icon: <FileText size={18} /> },
     { href: '/admin/settings', label: 'Configuración', icon: <Settings size={18} /> },
   ],
@@ -39,6 +40,7 @@ const NAV_ITEMS: Record<string, { href: string; label: string; icon: React.React
     { href: '/coach/stats', label: 'Estadísticas', icon: <BarChart2 size={18} /> },
     { href: '/campeonatos', label: 'Campeonatos', icon: <Medal size={18} /> },
     { href: '/coach/players', label: 'Jugadores', icon: <Users size={18} /> },
+    { href: '/coach/reconocimientos', label: 'Reconocimientos', icon: <Award size={18} /> },
     { href: '/coach/training', label: 'Planes de entrenamiento', icon: <Dumbbell size={18} /> },
     { href: '/coach/chat', label: 'Chat', icon: <MessageCircle size={18} /> },
   ],
@@ -46,6 +48,7 @@ const NAV_ITEMS: Record<string, { href: string; label: string; icon: React.React
     { href: '/player', label: 'Mi panel', icon: <LayoutDashboard size={18} /> },
     { href: '/player/calendar', label: 'Calendario', icon: <Calendar size={18} /> },
     { href: '/player/stats', label: 'Mis estadísticas', icon: <BarChart2 size={18} /> },
+    { href: '/player/logros', label: 'Mis logros', icon: <Award size={18} /> },
     { href: '/player/payments', label: 'Mis pagos', icon: <DollarSign size={18} /> },
     { href: '/player/chat', label: 'Chat', icon: <MessageCircle size={18} /> },
   ],
