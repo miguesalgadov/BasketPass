@@ -192,7 +192,7 @@ export function PlayerCredential({ player, onAvatarChange, onAvatarDelete, payme
             <p style={{ fontSize: 11, fontWeight: 700, color: '#1A2542', margin: 0 }}>31/12/{year}</p>
           </div>
           {/* Club badge */}
-          <div style={{ width: 76, height: 76, background: `linear-gradient(135deg, ${accent} 0%, ${accent}BB 100%)`, borderRadius: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: `0 4px 16px ${accent}40`, overflow: 'hidden', padding: club?.logo ? 4 : 0 }}>
+          <div style={{ width: 90, height: 90, background: club?.logo ? '#fff' : `linear-gradient(135deg, ${accent} 0%, ${accent}BB 100%)`, borderRadius: 12, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 2px 14px rgba(0,0,0,0.14)', overflow: 'hidden', padding: 0 }}>
             {club?.logo ? (
               <img
                 data-club-logo
@@ -202,8 +202,8 @@ export function PlayerCredential({ player, onAvatarChange, onAvatarDelete, payme
               />
             ) : (
               <>
-                <span style={{ color: '#fff', fontWeight: 900, fontSize: 22, lineHeight: 1, display: 'block' }}>{initials}</span>
-                <span style={{ color: 'rgba(255,255,255,0.65)', fontSize: 7, letterSpacing: '1px', marginTop: 3, textTransform: 'uppercase', maxWidth: 66, textAlign: 'center', lineHeight: 1.2 }}>
+                <span style={{ color: '#fff', fontWeight: 900, fontSize: 24, lineHeight: 1, display: 'block' }}>{initials}</span>
+                <span style={{ color: 'rgba(255,255,255,0.65)', fontSize: 7, letterSpacing: '1px', marginTop: 3, textTransform: 'uppercase', maxWidth: 76, textAlign: 'center', lineHeight: 1.2 }}>
                   {club?.name?.slice(0, 10) ?? 'Club'}
                 </span>
               </>
