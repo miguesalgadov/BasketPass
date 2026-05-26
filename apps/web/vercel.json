@@ -1,5 +1,5 @@
 {
-  "installCommand": "cd ../.. && npm ci",
+  "installCommand": "cd ../.. && rm -rf node_modules && npm install",
   "buildCommand": "npm run build",
   "outputDirectory": ".next",
   "framework": "nextjs",
