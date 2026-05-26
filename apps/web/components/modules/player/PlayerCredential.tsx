@@ -239,7 +239,7 @@ export function PlayerCredential({ player, onAvatarChange, onAvatarDelete, payme
 
       {/* ── FOOTER ── */}
       <div style={{ background: '#0D1530', padding: '11px 16px' }}>
-        <p style={{ color: 'rgba(255,255,255,0.55)', fontWeight: 600, fontSize: 11, margin: 0, letterSpacing: '0.3px', fontStyle: 'italic' }}>
+        <p style={{ color: 'rgba(255,255,255,0.55)', fontWeight: 600, fontSize: 11, margin: 0, letterSpacing: '0.3px', fontStyle: 'italic', textAlign: 'center' }}>
           Tu Pasión, tu identidad, tu juego.
         </p>
       </div>
