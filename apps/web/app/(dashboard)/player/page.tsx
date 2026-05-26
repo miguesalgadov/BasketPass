@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { flushSync } from 'react-dom';
 import { Share2, Loader2 } from 'lucide-react';
 import { api } from '@/lib/api';
 import toast from 'react-hot-toast';
@@ -40,7 +39,7 @@ function SkeletonCard({ h = 'h-40' }: { h?: string }) {
   return <div className={`${h} rounded-xl bg-white/5 animate-pulse`} />;
 }
 
-function ShareStoryButton({ onClick, loading }: { onClick: () => void; loading: boolean }) {
+function ShareStoryButton({ onClick, loading, ready }: { onClick: () => void; loading: boolean; ready: boolean }) {
   return (
     <button
       onClick={onClick}
@@ -48,19 +47,101 @@ function ShareStoryButton({ onClick, loading }: { onClick: () => void; loading: 
       className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white/50 hover:text-white/80 text-sm font-medium transition disabled:opacity-40"
     >
       {loading
-        ? <><Loader2 size={15} className="animate-spin" /> Generando...</>
+        ? <><Loader2 size={15} className="animate-spin" /> {ready ? 'Compartiendo...' : 'Generando...'}</>
         : <><Share2 size={15} /> Compartir carnet</>}
     </button>
   );
 }
 
+async function buildStoryFile(element: HTMLDivElement, lastName: string): Promise<File | null> {
+  try {
+    const html2canvas = (await import('html2canvas')).default;
+
+    const cardCanvas = await html2canvas(element, {
+      backgroundColor: null,
+      scale: 3,
+      useCORS: true,
+      logging: false,
+      onclone: (_doc, el) => {
+        // Hide camera/delete controls marked with data-no-capture
+        el.querySelectorAll('[data-no-capture]').forEach((n) => { (n as HTMLElement).style.display = 'none'; });
+
+        // Fix player photo (html2canvas doesn't handle object-fit:cover)
+        const photo = el.querySelector('[data-player-photo]') as HTMLImageElement | null;
+        if (photo?.parentElement) {
+          const p = photo.parentElement as HTMLElement;
+          p.style.backgroundImage = `url("${photo.src}")`;
+          p.style.backgroundSize = 'cover';
+          p.style.backgroundPosition = 'top center';
+          p.style.backgroundRepeat = 'no-repeat';
+          photo.style.display = 'none';
+        }
+
+        // Fix club logo
+        const clubLogo = el.querySelector('[data-club-logo]') as HTMLImageElement | null;
+        if (clubLogo?.parentElement) {
+          const p = clubLogo.parentElement as HTMLElement;
+          p.style.backgroundImage = `url("${clubLogo.src}")`;
+          p.style.backgroundSize = 'contain';
+          p.style.backgroundPosition = 'center';
+          p.style.backgroundRepeat = 'no-repeat';
+          clubLogo.style.display = 'none';
+        }
+
+        // Fix SVG stroke inheritance
+        try {
+          el.querySelectorAll('svg').forEach((svg) => {
+            const attrStroke = svg.getAttribute('stroke');
+            const inlineColor = (svg as unknown as HTMLElement).style.color;
+            const color =
+              attrStroke && attrStroke !== 'currentColor' ? attrStroke :
+              inlineColor ? inlineColor : null;
+            if (!color) return;
+            svg.querySelectorAll('path, circle, line, polyline, rect, polygon, ellipse').forEach((child) => {
+              const s = child.getAttribute('stroke');
+              if (!s || s === 'currentColor') child.setAttribute('stroke', color);
+            });
+            if (svg.getAttribute('stroke') === 'currentColor') svg.setAttribute('stroke', color);
+          });
+        } catch (_) { /* non-fatal */ }
+      },
+    });
+
+    const story = document.createElement('canvas');
+    story.width  = 1080;
+    story.height = 1920;
+    const ctx = story.getContext('2d')!;
+
+    const bg = ctx.createLinearGradient(0, 0, 0, 1920);
+    bg.addColorStop(0, '#0D1525');
+    bg.addColorStop(1, '#111827');
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, 1080, 1920);
+
+    const margin = 80;
+    const cardW  = story.width - margin * 2;
+    const scale  = cardW / cardCanvas.width;
+    const cardH  = cardCanvas.height * scale;
+    ctx.drawImage(cardCanvas, margin, (story.height - cardH) / 2, cardW, cardH);
+
+    const blob = await new Promise<Blob | null>((resolve) => story.toBlob(resolve, 'image/png'));
+    if (!blob) return null;
+
+    return new File([blob], `carnet-${lastName.toLowerCase()}.png`, { type: 'image/png' });
+  } catch (e) {
+    console.error('[buildStoryFile]', e);
+    return null;
+  }
+}
+
 export default function PlayerDashboardPage() {
-  const [data, setData]         = useState<DashboardData | null>(null);
-  const [loading, setLoading]   = useState(true);
-  const [sharing, setSharing]   = useState(false);
-  const [capturing, setCapturing] = useState(false);
-  const mobileCardRef           = useRef<HTMLDivElement>(null);
-  const desktopCardRef          = useRef<HTMLDivElement>(null);
+  const [data, setData]       = useState<DashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [sharing, setSharing] = useState(false);
+  const mobileCardRef         = useRef<HTMLDivElement>(null);
+  const desktopCardRef        = useRef<HTMLDivElement>(null);
+  const storyFileRef          = useRef<File | null>(null);
+  const preGenRunning         = useRef(false);
 
   useEffect(() => {
     api.get('/players/me/dashboard')
@@ -68,6 +149,26 @@ export default function PlayerDashboardPage() {
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
+
+  // Pre-generate the story image in background after card renders
+  useEffect(() => {
+    if (!data?.player || preGenRunning.current) return;
+    preGenRunning.current = true;
+
+    const run = async () => {
+      // Wait for DOM to finish painting
+      await new Promise((r) => setTimeout(r, 800));
+
+      const isMobile = window.innerWidth < 1024;
+      const el = isMobile ? mobileCardRef.current : desktopCardRef.current;
+      if (!el) return;
+
+      const file = await buildStoryFile(el, data.player.lastName);
+      storyFileRef.current = file;
+    };
+
+    run();
+  }, [data]);
 
   const handleAvatarFileChange = async (file: File) => {
     const formData = new FormData();
@@ -77,6 +178,9 @@ export default function PlayerDashboardPage() {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       setData((prev) => prev ? { ...prev, player: { ...prev.player!, photoUrl: res.data.data.avatarUrl } } : prev);
+      // Invalidate pre-generated story so it regenerates with the new photo
+      storyFileRef.current = null;
+      preGenRunning.current = false;
       toast.success('Foto actualizada');
     } catch {
       toast.error('Error al subir la foto');
@@ -87,6 +191,8 @@ export default function PlayerDashboardPage() {
     try {
       await api.delete('/players/me/avatar');
       setData((prev) => prev ? { ...prev, player: { ...prev.player!, photoUrl: null } } : prev);
+      storyFileRef.current = null;
+      preGenRunning.current = false;
       toast.success('Foto eliminada');
     } catch {
       toast.error('Error al eliminar la foto');
@@ -94,122 +200,35 @@ export default function PlayerDashboardPage() {
   };
 
   const handleShareStory = async () => {
-    const isMobile = window.innerWidth < 1024;
-    const ref = isMobile ? mobileCardRef : desktopCardRef;
-    if (!ref.current) return;
-
-    // Hide camera/delete buttons synchronously before capture
-    flushSync(() => setCapturing(true));
     setSharing(true);
     try {
-      const html2canvas = (await import('html2canvas')).default;
+      // Use pre-generated file if available — share is called immediately within user gesture
+      let file = storyFileRef.current;
 
-      const cardCanvas = await html2canvas(ref.current, {
-        backgroundColor: null,
-        scale: 3,
-        useCORS: true,
-        logging: false,
-        onclone: (_doc, element) => {
-          // Fix 1: player photo — html2canvas doesn't handle object-fit:cover
-          const photo = element.querySelector('[data-player-photo]') as HTMLImageElement | null;
-          if (photo?.parentElement) {
-            const parent = photo.parentElement as HTMLElement;
-            parent.style.backgroundImage = `url("${photo.src}")`;
-            parent.style.backgroundSize = 'cover';
-            parent.style.backgroundPosition = 'top center';
-            parent.style.backgroundRepeat = 'no-repeat';
-            photo.style.display = 'none';
-          }
-          // Fix 2: club logo
-          const clubLogo = element.querySelector('[data-club-logo]') as HTMLImageElement | null;
-          if (clubLogo?.parentElement) {
-            const parent = clubLogo.parentElement as HTMLElement;
-            parent.style.backgroundImage = `url("${clubLogo.src}")`;
-            parent.style.backgroundSize = 'contain';
-            parent.style.backgroundPosition = 'center';
-            parent.style.backgroundRepeat = 'no-repeat';
-            clubLogo.style.display = 'none';
-          }
-          // Fix 3: propagate SVG stroke to child elements.
-          // html2canvas serialises SVG to an image and does not inherit the parent
-          // SVG's stroke attribute into child <path>/<circle>/etc., so each child
-          // must carry the stroke explicitly.
-          try {
-            element.querySelectorAll('svg').forEach((svg) => {
-              // Resolve effective color: explicit stroke attr takes priority, then
-              // inline style.color (legacy path), then skip.
-              const attrStroke  = svg.getAttribute('stroke');
-              const inlineColor = (svg as unknown as HTMLElement).style.color;
-              const color =
-                attrStroke && attrStroke !== 'currentColor' ? attrStroke :
-                inlineColor                                 ? inlineColor :
-                null;
-              if (!color) return;
-
-              // Stamp the resolved color on every child that has no explicit stroke
-              svg.querySelectorAll('path, circle, line, polyline, rect, polygon, ellipse').forEach((child) => {
-                const s = child.getAttribute('stroke');
-                if (!s || s === 'currentColor') child.setAttribute('stroke', color);
-              });
-
-              // Also fix the SVG root itself if still currentColor
-              if (svg.getAttribute('stroke') === 'currentColor') svg.setAttribute('stroke', color);
-            });
-          } catch (_) { /* non-fatal */ }
-        },
-      });
-
-      // 9:16 Instagram story canvas
-      const story = document.createElement('canvas');
-      story.width  = 1080;
-      story.height = 1920;
-      const ctx = story.getContext('2d')!;
-
-      // Background gradient matching the app
-      const bg = ctx.createLinearGradient(0, 0, 0, 1920);
-      bg.addColorStop(0, '#0D1525');
-      bg.addColorStop(1, '#111827');
-      ctx.fillStyle = bg;
-      ctx.fillRect(0, 0, 1080, 1920);
-
-      // Scale card to fit with side margins
-      const margin  = 80;
-      const cardW   = story.width - margin * 2;
-      const scale   = cardW / cardCanvas.width;
-      const cardH   = cardCanvas.height * scale;
-      const x       = margin;
-      const y       = (story.height - cardH) / 2;
-
-      ctx.drawImage(cardCanvas, x, y, cardW, cardH);
-
-      const fileName = `carnet-${data?.player?.lastName?.toLowerCase() ?? 'jugador'}.png`;
-      const blob = await new Promise<Blob | null>((resolve) => story.toBlob(resolve, 'image/png'));
-      if (!blob) throw new Error('No se pudo generar la imagen (toBlob retornó null)');
-      const file = new File([blob], fileName, { type: 'image/png' });
-
-      const downloadFallback = () => {
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.download = fileName;
-        link.href = url;
-        link.click();
-        URL.revokeObjectURL(url);
-        toast.success('Imagen guardada — compartila desde tu galería de fotos');
-      };
+      if (!file) {
+        // Not ready yet — generate now (may lose user gesture on some browsers)
+        const isMobile = window.innerWidth < 1024;
+        const el = isMobile ? mobileCardRef.current : desktopCardRef.current;
+        if (!el) return;
+        file = await buildStoryFile(el, data?.player?.lastName ?? 'jugador');
+        if (!file) { toast.error('No se pudo generar la imagen'); return; }
+        storyFileRef.current = file;
+      }
 
       if (navigator.canShare?.({ files: [file] })) {
-        try {
-          await navigator.share({
-            files: [file],
-            title: `Carnet de ${data?.player?.firstName} ${data?.player?.lastName}`,
-          });
-        } catch (shareErr: any) {
-          if (shareErr?.name === 'AbortError') return;
-          // NotAllowedError: browser lost user gesture context after async work → download
-          downloadFallback();
-        }
+        await navigator.share({
+          files: [file],
+          title: `Carnet de ${data?.player?.firstName} ${data?.player?.lastName}`,
+        });
       } else {
-        downloadFallback();
+        // Desktop fallback: download
+        const url = URL.createObjectURL(file);
+        const a = document.createElement('a');
+        a.download = file.name;
+        a.href = url;
+        a.click();
+        URL.revokeObjectURL(url);
+        toast.success('Imagen descargada — compartila desde tu galería');
       }
     } catch (e: any) {
       if (e?.name !== 'AbortError') {
@@ -218,11 +237,8 @@ export default function PlayerDashboardPage() {
       }
     } finally {
       setSharing(false);
-      setCapturing(false);
     }
   };
-
-  const accent = data?.player?.club?.primaryColor ?? '#F97316';
 
   return (
     <div className="min-h-screen bg-[#0F1117] -m-4 lg:-m-6 p-4 lg:p-6 pb-24 lg:pb-6">
@@ -245,9 +261,9 @@ export default function PlayerDashboardPage() {
         ) : data?.player ? (
           <>
             <div ref={mobileCardRef}>
-              <PlayerCredential player={data.player} onAvatarChange={handleAvatarFileChange} onAvatarDelete={handleAvatarDelete} capturing={capturing} paymentStatus={data.paymentStatus} season={data.season} />
+              <PlayerCredential player={data.player} onAvatarChange={handleAvatarFileChange} onAvatarDelete={handleAvatarDelete} paymentStatus={data.paymentStatus} season={data.season} />
             </div>
-            <ShareStoryButton onClick={handleShareStory} loading={sharing} />
+            <ShareStoryButton onClick={handleShareStory} loading={sharing} ready={!!storyFileRef.current} />
             <PaymentStatusBadge status={data.paymentStatus} fees={data.fees} />
             <UpcomingActivities events={data.upcomingEvents} />
             <SeasonSummaryBar stats={data.season} />
@@ -283,9 +299,9 @@ export default function PlayerDashboardPage() {
           <div className="grid grid-cols-[320px_1fr] gap-4">
             <div className="space-y-3">
               <div ref={desktopCardRef}>
-                <PlayerCredential player={data.player} onAvatarChange={handleAvatarFileChange} onAvatarDelete={handleAvatarDelete} capturing={capturing} paymentStatus={data.paymentStatus} season={data.season} />
+                <PlayerCredential player={data.player} onAvatarChange={handleAvatarFileChange} onAvatarDelete={handleAvatarDelete} paymentStatus={data.paymentStatus} season={data.season} />
               </div>
-              <ShareStoryButton onClick={handleShareStory} loading={sharing} />
+              <ShareStoryButton onClick={handleShareStory} loading={sharing} ready={!!storyFileRef.current} />
               <PaymentStatusBadge status={data.paymentStatus} fees={data.fees} />
             </div>
             <div className="space-y-3">

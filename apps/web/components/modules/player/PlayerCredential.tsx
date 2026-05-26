@@ -178,14 +178,14 @@ export function PlayerCredential({ player, onAvatarChange, onAvatarDelete, payme
             {/* Camera controls */}
             {onAvatarChange && !capturing && (
               <>
-                <label style={{ position: 'absolute', inset: 0, cursor: 'pointer', opacity: 0, transition: 'opacity 0.2s', background: 'rgba(0,0,0,0.5)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4 }}
+                <label data-no-capture style={{ position: 'absolute', inset: 0, cursor: 'pointer', opacity: 0, transition: 'opacity 0.2s', background: 'rgba(0,0,0,0.5)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4 }}
                   className="hover:opacity-100 active:opacity-100">
                   <input type="file" accept="image/*" style={{ position: 'absolute', inset: 0, opacity: 0, cursor: 'pointer', width: '100%', height: '100%' }}
                     onChange={(e) => { const f = e.target.files?.[0]; if (f) onAvatarChange(f); e.target.value = ''; }} />
                   <Camera size={20} color="#fff" style={{ pointerEvents: 'none' }} />
                   <span style={{ fontSize: 9, color: '#fff', fontWeight: 500, pointerEvents: 'none' }}>Cambiar</span>
                 </label>
-                <label style={{ position: 'absolute', bottom: 8, right: 8, width: 28, height: 28, borderRadius: '50%', background: accent, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 2px 8px rgba(0,0,0,0.4)', overflow: 'hidden', zIndex: 20 }}>
+                <label data-no-capture style={{ position: 'absolute', bottom: 8, right: 8, width: 28, height: 28, borderRadius: '50%', background: accent, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 2px 8px rgba(0,0,0,0.4)', overflow: 'hidden', zIndex: 20 }}>
                   <input type="file" accept="image/*" style={{ position: 'absolute', inset: 0, opacity: 0, cursor: 'pointer', width: '100%', height: '100%' }}
                     onChange={(e) => { const f = e.target.files?.[0]; if (f) onAvatarChange(f); e.target.value = ''; }} />
                   <Camera size={13} color="#fff" style={{ pointerEvents: 'none' }} />
@@ -193,7 +193,7 @@ export function PlayerCredential({ player, onAvatarChange, onAvatarDelete, payme
               </>
             )}
             {avatarSrc && onAvatarDelete && !capturing && (
-              <button type="button" onClick={onAvatarDelete}
+              <button data-no-capture type="button" onClick={onAvatarDelete}
                 style={{ position: 'absolute', bottom: 8, right: 44, width: 28, height: 28, borderRadius: '50%', background: '#EF4444', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 2px 8px rgba(0,0,0,0.4)', zIndex: 20 }}>
                 <Trash2 size={13} style={{ color: '#fff' }} />
               </button>
