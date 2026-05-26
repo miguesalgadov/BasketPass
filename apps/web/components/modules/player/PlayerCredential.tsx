@@ -42,6 +42,14 @@ const PAYMENT: Record<string, { label: string; color: string }> = {
   DANGER:  { label: 'Vencido',   color: '#EF4444' },
 };
 
+const POSITIONS: Record<string, string> = {
+  PG: 'Base',
+  SG: 'Escolta',
+  SF: 'Alero',
+  PF: 'Ala-Pívot',
+  C:  'Pívot',
+};
+
 export function PlayerCredential({ player, onAvatarChange, onAvatarDelete, paymentStatus = 'OK', season, capturing = false }: Props) {
   const club    = player.club;
   const accent  = club?.primaryColor ?? '#F97316';
@@ -154,7 +162,7 @@ export function PlayerCredential({ player, onAvatarChange, onAvatarDelete, payme
             <div style={{ marginTop: 12 }}>
               {[
                 ['Categoría', player.team?.category ?? '—'],
-                ['Posición',  player.position ?? '—'],
+                ['Posición',  player.position ? (POSITIONS[player.position] ?? player.position) : '—'],
                 ['Dorsal',    player.jerseyNumber != null ? `#${player.jerseyNumber}` : '—'],
               ].map(([lbl, val]) => (
                 <div key={lbl} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 5 }}>
