@@ -34,13 +34,13 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     <div className="h-screen flex overflow-hidden bg-background">
       {sidebarOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+          className="fixed inset-0 z-[55] bg-black/50 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 transform transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 flex-shrink-0 ${
+        className={`fixed inset-y-0 left-0 z-[60] w-64 transform transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 flex-shrink-0 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
