@@ -26,6 +26,10 @@ export async function GET(req: NextRequest) {
   };
   if (!player) return ok(empty);
 
+  if (player.team?.category === 'Mayores') {
+    prisma.team.updateMany({ where: { category: 'Mayores' }, data: { category: 'Senior' } }).catch(() => {});
+  }
+
   const now    = new Date();
   const cutoff = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000);
 

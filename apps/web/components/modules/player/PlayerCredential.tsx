@@ -89,6 +89,20 @@ export function PlayerCredential({ player, onAvatarChange, paymentStatus = 'OK',
     : null;
 
   return (
+    <>
+    {onAvatarChange && (
+      <input
+        id="player-avatar-input"
+        type="file"
+        accept="image/*"
+        style={{ position: 'fixed', opacity: 0, width: 1, height: 1, top: 0, left: 0, zIndex: -1 }}
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) onAvatarChange(file);
+          e.target.value = '';
+        }}
+      />
+    )}
     <div
       className="rounded-2xl overflow-hidden shadow-2xl w-full select-none"
       style={{ background: 'linear-gradient(160deg, #0D1525 0%, #1A2540 100%)' }}
@@ -154,17 +168,6 @@ export function PlayerCredential({ player, onAvatarChange, paymentStatus = 'OK',
           <div className="absolute bottom-0 left-0 right-0 h-8" style={{ background: 'linear-gradient(to top, #1A2540 0%, transparent 100%)' }} />
           {onAvatarChange && (
             <>
-              <input
-                id="player-avatar-input"
-                type="file"
-                accept="image/*"
-                className="sr-only"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) onAvatarChange(file);
-                  e.target.value = '';
-                }}
-              />
               {/* Hover overlay */}
               <label
                 htmlFor="player-avatar-input"
@@ -237,5 +240,6 @@ export function PlayerCredential({ player, onAvatarChange, paymentStatus = 'OK',
         </div>
       </div>
     </div>
+    </>
   );
 }

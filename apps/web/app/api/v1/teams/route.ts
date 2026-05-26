@@ -15,6 +15,9 @@ export async function GET(req: NextRequest) {
     take: limit,
     orderBy: { name: 'asc' },
   });
+  if (teams.some((t) => t.category === 'Mayores')) {
+    prisma.team.updateMany({ where: { category: 'Mayores' }, data: { category: 'Senior' } }).catch(() => {});
+  }
   return ok(teams.map((t) => ({ ...t, category: t.category === 'Mayores' ? 'Senior' : t.category })));
 }
 
