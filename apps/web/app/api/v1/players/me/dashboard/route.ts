@@ -62,8 +62,10 @@ export async function GET(req: NextRequest) {
     }),
   ]);
 
-  // Payment status
-  const overdueCount  = fees.filter((f) => f.status === 'OVERDUE').length;
+  // Payment status — mirror the same runtime overdue check used in the admin matrix view
+  const overdueCount  = fees.filter((f) =>
+    f.status === 'OVERDUE' || (f.status === 'PENDING' && new Date(f.dueDate) < now)
+  ).length;
   const paymentStatus = overdueCount === 0 ? 'OK' : overdueCount === 1 ? 'WARNING' : 'DANGER';
 
   // Season stats
