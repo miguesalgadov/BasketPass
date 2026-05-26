@@ -1,12 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Settings, Building2, Lock, Tag, Plus, Trash2, Pencil, Check, X } from 'lucide-react';
+import { Settings, Building2, Lock, Tag, Plus, Trash2, Pencil, Check, X, Camera } from 'lucide-react';
 import { api } from '@/lib/api';
 import toast from 'react-hot-toast';
 import { cn } from '@/lib/utils';
 
-interface Club { id: string; name: string; slug: string; primaryColor: string | null; plan: string }
+interface Club { id: string; name: string; slug: string; primaryColor: string | null; logo: string | null; plan: string }
 interface FeeType { id: string; name: string; amount: number; currency: string; isRecurring: boolean; dueDayOfMonth: number | null }
 
 const CURRENCIES = ['CLP', 'ARS', 'PEN', 'COP', 'MXN', 'USD'];
@@ -31,7 +31,8 @@ export default function SettingsPage() {
   // Club form
   const [clubName, setClubName]   = useState('');
   const [clubColor, setClubColor] = useState('#F97316');
-  const [savingClub, setSavingClub] = useState(false);
+  const [savingClub, setSavingClub]   = useState(false);
+  const [logoUploading, setLogoUploading] = useState(false);
 
   // Password form
   const [currentPwd, setCurrentPwd] = useState('');
@@ -61,6 +62,27 @@ export default function SettingsPage() {
     }).catch(() => toast.error('Error al cargar configuración'))
       .finally(() => setLoadingClub(false));
   }, []);
+
+  async function uploadLogo(file: File) {
+    setLogoUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('logo', file);
+      const res = await api.post('/club/logo', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+      setClub(prev => prev ? { ...prev, logo: res.data.data.logo } : prev);
+      toast.success('Logo del club actualizado');
+    } catch { toast.error('Error al subir el logo'); }
+    finally { setLogoUploading(false); }
+  }
+
+  async function deleteLogo() {
+    if (!confirm('¿Eliminar el logo del club?')) return;
+    try {
+      await api.delete('/club/logo');
+      setClub(prev => prev ? { ...prev, logo: null } : prev);
+      toast.success('Logo eliminado');
+    } catch { toast.error('Error al eliminar el logo'); }
+  }
 
   async function saveClub() {
     if (!clubName.trim()) return;
@@ -166,6 +188,28 @@ export default function SettingsPage() {
               />
               <span className="text-sm text-muted-foreground font-mono">{clubColor}</span>
               <div className="w-8 h-8 rounded-full border border-border" style={{ background: clubColor }} />
+            </div>
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-muted-foreground mb-1.5">Logo del club</label>
+            <div className="flex items-center gap-3">
+              <div className="w-16 h-16 rounded-xl border border-border bg-muted/30 flex items-center justify-center overflow-hidden">
+                {club?.logo
+                  ? <img src={club.logo} alt="Logo" className="w-full h-full object-contain p-1" />
+                  : <Building2 size={24} className="text-muted-foreground" />}
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <label className="flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 text-primary text-xs font-medium rounded-lg cursor-pointer hover:bg-primary/20 transition">
+                  <input type="file" accept="image/*" className="hidden"
+                    onChange={e => { const f = e.target.files?.[0]; if (f) uploadLogo(f); e.target.value = ''; }} />
+                  <Camera size={13} /> {logoUploading ? 'Subiendo...' : 'Subir logo'}
+                </label>
+                {club?.logo && (
+                  <button onClick={deleteLogo} className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-500 text-xs font-medium rounded-lg hover:bg-red-100 transition">
+                    <Trash2 size={13} /> Eliminar logo
+                  </button>
+                )}
+              </div>
             </div>
           </div>
           <div>

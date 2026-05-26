@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
       user: {
         select: {
           firstName: true, lastName: true, avatarUrl: true,
-          club: { select: { name: true, primaryColor: true, slug: true } },
+          club: { select: { name: true, primaryColor: true, slug: true, logo: true } },
         },
       },
     },

@@ -122,6 +122,16 @@ export default function PlayerDashboardPage() {
             parent.style.backgroundRepeat = 'no-repeat';
             photo.style.display = 'none';
           }
+          // Club logo: ensure object-fit:contain is applied on parent background fallback
+          const clubLogo = element.querySelector('[data-club-logo]') as HTMLImageElement | null;
+          if (clubLogo?.parentElement) {
+            const parent = clubLogo.parentElement as HTMLElement;
+            parent.style.backgroundImage = `url("${clubLogo.src}")`;
+            parent.style.backgroundSize = 'contain';
+            parent.style.backgroundPosition = 'center';
+            parent.style.backgroundRepeat = 'no-repeat';
+            clubLogo.style.display = 'none';
+          }
         },
       });
 
