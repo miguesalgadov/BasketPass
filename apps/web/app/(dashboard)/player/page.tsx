@@ -139,7 +139,7 @@ export default function PlayerDashboardPage() {
               // Resolve effective color: explicit stroke attr takes priority, then
               // inline style.color (legacy path), then skip.
               const attrStroke  = svg.getAttribute('stroke');
-              const inlineColor = (svg as HTMLElement).style.color;
+              const inlineColor = (svg as unknown as HTMLElement).style.color;
               const color =
                 attrStroke && attrStroke !== 'currentColor' ? attrStroke :
                 inlineColor                                 ? inlineColor :
