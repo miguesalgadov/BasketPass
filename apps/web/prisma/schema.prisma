@@ -58,6 +58,7 @@ model User {
   notifications        Notification[]
   sentMessages         Message[]      @relation("MessageSender")
   refreshTokens        RefreshToken[]
+  pushSubscriptions    PushSubscription[]
   createdChampionships Championship[]
   addedParticipants    ChampParticipant[] @relation("AddedParticipants")
   champAuditLogs       ChampAuditLog[]    @relation("AuditLogUser")
@@ -74,6 +75,17 @@ model RefreshToken {
   userId    String
   token     String   @unique
   expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
   createdAt DateTime @default(now())
 
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)

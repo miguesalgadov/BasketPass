@@ -6,6 +6,7 @@ import { Sidebar } from './Sidebar';
 import { Navbar } from './Navbar';
 import { BottomNavBar } from './BottomNavBar';
 import { useAuthStore } from '@/store/auth.store';
+import { NotificationPrompt } from '@/components/NotificationPrompt';
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -55,6 +56,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       </div>
 
       {isPlayer && <BottomNavBar />}
+      <NotificationPrompt />
     </div>
   );
 }
