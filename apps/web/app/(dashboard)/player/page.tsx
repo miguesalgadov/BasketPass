@@ -130,18 +130,32 @@ export default function PlayerDashboardPage() {
             parent.style.backgroundRepeat = 'no-repeat';
             clubLogo.style.display = 'none';
           }
-          // Fix 3: resolve currentColor in Lucide SVG icons
-          // html2canvas doesn't propagate the CSS `color` property into SVG stroke/fill.
+          // Fix 3: propagate SVG stroke to child elements.
+          // html2canvas serialises SVG to an image and does not inherit the parent
+          // SVG's stroke attribute into child <path>/<circle>/etc., so each child
+          // must carry the stroke explicitly.
           try {
             element.querySelectorAll('svg').forEach((svg) => {
-              const color = (svg as HTMLElement).style.color;
+              // Resolve effective color: explicit stroke attr takes priority, then
+              // inline style.color (legacy path), then skip.
+              const attrStroke  = svg.getAttribute('stroke');
+              const inlineColor = (svg as HTMLElement).style.color;
+              const color =
+                attrStroke && attrStroke !== 'currentColor' ? attrStroke :
+                inlineColor                                 ? inlineColor :
+                null;
               if (!color) return;
-              svg.querySelectorAll('[stroke="currentColor"]').forEach((el) => el.setAttribute('stroke', color));
-              svg.querySelectorAll('[fill="currentColor"]').forEach((el)   => el.setAttribute('fill',   color));
+
+              // Stamp the resolved color on every child that has no explicit stroke
+              svg.querySelectorAll('path, circle, line, polyline, rect, polygon, ellipse').forEach((child) => {
+                const s = child.getAttribute('stroke');
+                if (!s || s === 'currentColor') child.setAttribute('stroke', color);
+              });
+
+              // Also fix the SVG root itself if still currentColor
               if (svg.getAttribute('stroke') === 'currentColor') svg.setAttribute('stroke', color);
-              if (svg.getAttribute('fill')   === 'currentColor') svg.setAttribute('fill',   color);
             });
-          } catch (_) { /* non-fatal — icons may render without correct color */ }
+          } catch (_) { /* non-fatal */ }
         },
       });
 
