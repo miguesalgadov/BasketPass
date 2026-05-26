@@ -12,13 +12,32 @@ export const metadata: Metadata = {
   },
   description: 'Gestión integral de equipos de baloncesto',
   manifest: '/manifest.json',
-  icons: { apple: '/icon-192x192.png' },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'BasketPass',
+  },
+  icons: {
+    icon: [
+      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/icons/icon-192x192.png', sizes: '192x192', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/icons/icon-180x180.png', sizes: '180x180', type: 'image/png' },
+    ],
+  },
 };
 
 export const viewport: Viewport = {
-  themeColor: '#F97316',
+  themeColor: [
+    { media: '(prefers-color-scheme: dark)',  color: '#0D1530' },
+    { media: '(prefers-color-scheme: light)', color: '#F97316' },
+  ],
   width: 'device-width',
   initialScale: 1,
+  minimumScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
