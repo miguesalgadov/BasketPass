@@ -228,7 +228,7 @@ export function PlayerCredential({ player, onAvatarChange, onAvatarDelete, payme
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6 }}>
             {stats.map(({ Icon, label, value, color }) => (
               <div key={label} style={{ textAlign: 'center', background: '#fff', borderRadius: 8, padding: '8px 4px', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
-                <Icon size={14} color={accent} style={{ display: 'block', margin: '0 auto 4px' }} />
+                <Icon size={14} color="#1A2542" style={{ display: 'block', margin: '0 auto 4px' }} />
                 <p style={{ fontSize: 6.5, color: '#8896B0', margin: '0 0 2px', letterSpacing: '0.3px', lineHeight: 1.2 }}>{label}</p>
                 <p style={{ fontSize: 11, fontWeight: 700, color, margin: 0, lineHeight: 1 }}>{value}</p>
               </div>
