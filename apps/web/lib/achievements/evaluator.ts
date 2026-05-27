@@ -39,8 +39,8 @@ export async function evaluatePlayerAchievements(
     if (!ruleFn) continue;
 
     // Get or create PlayerAchievement
-    let pa = await prisma.playerAchievement.findUnique({
-      where: { playerId_achievementId: { playerId, achievementId: ach.id } },
+    let pa = await prisma.playerAchievement.findFirst({
+      where: { playerId, achievementId: ach.id },
     });
 
     // Already unlocked — skip

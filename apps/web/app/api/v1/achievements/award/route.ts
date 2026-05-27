@@ -40,19 +40,19 @@ export async function POST(req: NextRequest) {
   // Comment length
   if (comment && comment.length > 250) return err('El comentario no puede superar 250 caracteres', 'COMMENT_TOO_LONG', 400);
 
-  // Upsert PlayerAchievement
-  const existing = await prisma.playerAchievement.findUnique({
-    where: { playerId_achievementId: { playerId, achievementId } },
+  // Find existing PlayerAchievement (can't use findUnique — unique key includes nullable seasonId)
+  const existing = await prisma.playerAchievement.findFirst({
+    where: { playerId, achievementId },
   });
 
   if (existing?.status === 'UNLOCKED') return err('Este jugador ya tiene esta insignia', 'ALREADY_UNLOCKED', 400);
 
-  const pa = await prisma.playerAchievement.upsert({
-    where:  { playerId_achievementId: { playerId, achievementId } },
-    update: { status: 'UNLOCKED', unlockedAt: new Date(), awardedByCoachId: auth.id, coachComment: comment ?? null, progress: 1, target: 1 },
-    create: { playerId, achievementId, status: 'UNLOCKED', unlockedAt: new Date(), awardedByCoachId: auth.id, coachComment: comment ?? null, progress: 1, target: 1 },
-    include: { achievement: true, player: { include: { user: true } } },
-  });
+  const paData = { status: 'UNLOCKED' as const, unlockedAt: new Date(), awardedByCoachId: auth.id, coachComment: comment ?? null, progress: 1, target: 1 };
+  const include = { achievement: true, player: { include: { user: true } } } as const;
+
+  const pa = existing
+    ? await prisma.playerAchievement.update({ where: { id: existing.id }, data: paData, include })
+    : await prisma.playerAchievement.create({ data: { playerId, achievementId, ...paData }, include });
 
   // Emit event
   const coach    = await prisma.user.findUnique({ where: { id: auth.id }, select: { firstName: true, lastName: true } });
