@@ -22,12 +22,26 @@ export interface Achievement {
   coachComment?: string | null;
 }
 
+export interface PlayerProfile {
+  id:           string;
+  firstName:    string;
+  lastName:     string;
+  avatarUrl:    string | null;
+  jerseyNumber: number | null;
+  position:     string | null;
+  isActive:     boolean;
+  team:  { name: string; category: string } | null;
+  club:  { name: string; logo: string | null } | null;
+}
+
 export interface AchievementSummary {
-  unlockedCount:   number;
-  inProgressCount: number;
-  totalPoints:     number;
-  level:           { id: number; name: string; min: number; max: number; color: string };
-  unreadEvents:    number;
+  unlockedCount:    number;
+  inProgressCount:  number;
+  totalPoints:      number;
+  level:            { id: number; name: string; min: number; max: number; color: string };
+  nextLevel:        { id: number; name: string; min: number; max: number; color: string } | null;
+  progressToNext:   number;
+  unreadEvents:     number;
 }
 
 export const CATEGORY_CONFIG: Record<AchievementCategory, { label: string; color: string; bg: string }> = {

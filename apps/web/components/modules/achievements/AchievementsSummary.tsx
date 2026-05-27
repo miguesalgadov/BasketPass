@@ -1,5 +1,5 @@
-import { Trophy, Zap, Star } from 'lucide-react';
-import { PlayerLevelBadge } from './PlayerLevelBadge';
+import { Trophy, Target, Crown, Star } from 'lucide-react';
+import { AchievementKPICard } from './AchievementKPICard';
 import type { AchievementSummary } from './types';
 
 interface AchievementsSummaryProps {
@@ -7,26 +7,44 @@ interface AchievementsSummaryProps {
 }
 
 export function AchievementsSummary({ summary }: AchievementsSummaryProps) {
+  const { level, nextLevel, progressToNext, unlockedCount, inProgressCount, totalPoints } = summary;
+
+  const levelSub = nextLevel
+    ? `${unlockedCount} logros · ${nextLevel.min - unlockedCount} para ${nextLevel.name}`
+    : `${unlockedCount} logros · Nivel máximo`;
+
   return (
-    <div className="space-y-3">
-      <div className="grid grid-cols-3 gap-2">
-        <div className="rounded-xl bg-white/[0.04] border border-white/10 p-3 text-center">
-          <Trophy size={16} className="mx-auto text-green-400 mb-1" />
-          <p className="text-lg font-black text-white">{summary.unlockedCount}</p>
-          <p className="text-[10px] text-white/40">Desbloqueados</p>
-        </div>
-        <div className="rounded-xl bg-white/[0.04] border border-white/10 p-3 text-center">
-          <Zap size={16} className="mx-auto text-orange-400 mb-1" />
-          <p className="text-lg font-black text-white">{summary.inProgressCount}</p>
-          <p className="text-[10px] text-white/40">En progreso</p>
-        </div>
-        <div className="rounded-xl bg-white/[0.04] border border-white/10 p-3 text-center">
-          <Star size={16} className="mx-auto text-yellow-400 mb-1" />
-          <p className="text-lg font-black text-white">{summary.totalPoints}</p>
-          <p className="text-[10px] text-white/40">Puntos</p>
-        </div>
-      </div>
-      <PlayerLevelBadge level={summary.level} unlockedCount={summary.unlockedCount} />
+    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+      <AchievementKPICard
+        icon={Trophy}
+        iconColor="#0057FF"
+        value={unlockedCount}
+        label="Desbloqueados"
+        cta="Ver todos"
+      />
+      <AchievementKPICard
+        icon={Target}
+        iconColor="#FF5A00"
+        value={inProgressCount}
+        label="En progreso"
+        cta="Ver todos"
+      />
+      <AchievementKPICard
+        icon={Crown}
+        iconColor={level.color}
+        value={level.name}
+        label="Nivel actual"
+        sub={levelSub}
+        progress={progressToNext}
+        progressColor={level.color}
+      />
+      <AchievementKPICard
+        icon={Star}
+        iconColor="#F5B301"
+        value={totalPoints.toLocaleString('es-CL')}
+        label="Puntos"
+        cta="Historial"
+      />
     </div>
   );
 }

@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { Eye, EyeOff } from 'lucide-react';
+import Link from 'next/link';
+import { Eye, EyeOff, ChevronRight } from 'lucide-react';
 import { AchievementBadge } from './AchievementBadge';
 import { CATEGORY_CONFIG, RARITY_LABEL } from './types';
 import type { Achievement } from './types';
@@ -63,16 +64,24 @@ export function AchievementCatalog({ achievements, onToggle }: AchievementCatalo
               </div>
             </div>
 
-            {onToggle && (
-              <button
-                onClick={() => handleToggle(a)}
-                disabled={toggling === a.id}
-                className="p-1.5 rounded-lg hover:bg-white/10 transition text-white/40 hover:text-white/70"
-                title={active ? 'Desactivar' : 'Activar'}
+            <div className="flex items-center gap-1">
+              {onToggle && (
+                <button
+                  onClick={() => handleToggle(a)}
+                  disabled={toggling === a.id}
+                  className="p-1.5 rounded-lg hover:bg-white/10 transition text-white/40 hover:text-white/70"
+                  title={active ? 'Desactivar' : 'Activar'}
+                >
+                  {active ? <Eye size={14} /> : <EyeOff size={14} />}
+                </button>
+              )}
+              <Link
+                href={`/admin/insignias/${a.id}`}
+                className="p-1.5 rounded-lg hover:bg-white/10 transition text-white/30 hover:text-white/60"
               >
-                {active ? <Eye size={14} /> : <EyeOff size={14} />}
-              </button>
-            )}
+                <ChevronRight size={14} />
+              </Link>
+            </div>
           </div>
         );
       })}
